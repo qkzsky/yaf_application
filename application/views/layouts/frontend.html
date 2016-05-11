@@ -1,0 +1,14 @@
+<?php use Helper\Html ?>
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title><?php echo $title?:null?></title>
+        <?= HTML::javascript('/js/jquery-2.1.4.min.js')?>
+        <?= Html::css('/css/style.css')?>
+    </head>
+    <body>
+        <?php echo $_content_;?>
+        <footer>Yaf v<?=\YAF_VERSION?></footer>
+    </body>
+</html>

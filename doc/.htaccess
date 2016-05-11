@@ -1,0 +1,7 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine on
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule .* index.php
+    php_flag magic_quotes_gpc off
+    php_flag register_globals off
+</IfModule>
