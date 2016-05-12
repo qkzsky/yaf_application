@@ -85,7 +85,7 @@ class Layout implements \Yaf_View_Interface
      *
      * @return void
      */
-    public function __construct($path, $options = array())
+    public function __construct($path, array $options = array())
     {
         $this->setLayoutPath($path);
         $this->options = $options;

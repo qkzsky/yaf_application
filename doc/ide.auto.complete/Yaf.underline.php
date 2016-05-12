@@ -52,7 +52,7 @@ final class Yaf_Application {
 	}
 	public function getModules() {
 	}
-	/*
+	/**
 	 * @return Yaf_Dispatcher
 	 */
 	public function getDispatcher() {
