@@ -57,9 +57,9 @@ class GoogleAuthenticator
      * period.
      * @return float
      */
-    public static function getTimestamp()
+    public static function getTimeSlice()
     {
-        return floor(microtime(true) / self::key_regeneration);
+        return floor(time() / self::key_regeneration);
     }
 
     /**
@@ -111,7 +111,7 @@ class GoogleAuthenticator
     {
         if ($counter === null)
         {
-            $counter = self::getTimestamp();
+            $counter = self::getTimeSlice();
         }
         $bin_secret  = self::_base32Encode($secret);
         $bin_counter = pack('N*', 0) . pack('N*', $counter);        // Counter must be 64-bit int
@@ -152,7 +152,7 @@ class GoogleAuthenticator
     public static function verifyToken($secret, $token, $discrepancy = 1, $timeStamp = null)
     {
         if ($timeStamp === null)
-            $timeStamp = self::getTimestamp();
+            $timeStamp = self::getTimeSlice();
         else
             $timeStamp = (int) $timeStamp;
 
