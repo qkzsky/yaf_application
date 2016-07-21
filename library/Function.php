@@ -378,7 +378,7 @@ function send_http_status($code)
  * 产生随机字串，可用来自动生成密码 默认长度6位 字母和数字混合
  * @param string $len 长度
  * @param string $type 字串类型
- * 0 字母 1 数字 其它 混合
+ * 1:字母(大小写混合); 2:数字; 3:特殊符号; 4:中文
  * @param string $addChars 额外字符
  * @return string
  */
