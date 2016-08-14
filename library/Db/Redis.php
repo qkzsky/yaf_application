@@ -52,14 +52,7 @@ class Redis
                     }
                     break;
                 default:
-                    if (extension_loaded('igbinary'))
-                    {
-                        $redis->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_IGBINARY);
-                    }
-                    else
-                    {
-                        $redis->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_PHP);
-                    }
+                    $redis->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_NONE);
                     break;
             }
             if ($db_config->db !== '')
