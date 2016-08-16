@@ -114,12 +114,13 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
      */
     private function _initRoute(Yaf_Dispatcher $dispatcher)
     {
-        $config = new Yaf_Config_Ini(APP_PATH . "/config/routes.ini");
         $router = $dispatcher->getRouter();
-        $router->addConfig($config);
 
         // 添加自定义路由规则
         $router->addRoute('my_route', new Router());
+
+        $config = new Yaf_Config_Ini(APP_PATH . "/config/routes.ini");
+        $router->addConfig($config);
     }
 
     /**
