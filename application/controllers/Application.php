@@ -29,13 +29,6 @@ class ApplicationController extends Yaf_Controller_Abstract
     protected $session;
 
     /**
-     * A Yaf_Config_Ini object that contains application configuration data.
-     *
-     * @var Yaf_Config_Ini
-     */
-    private $config;
-
-    /**
      * Initialize layout and session.
      *
      * In this method can be initialized anything that could be usefull for
@@ -45,20 +38,16 @@ class ApplicationController extends Yaf_Controller_Abstract
      */
     public function init()
     {
-        // Assign application config file to this controller
-        $this->config            = Yaf_Application::app()->getConfig();
-        // Assign config file to views
-        $this->getView()->config = $this->config;
-
         //Set session.
         if (!$this->getRequest()->isCli())
         {
-            if (!empty($this->config->session->save_handler) && !empty($this->config->session->save_path))
+            $session_conf = \Yaf_Application::app()->getConfig()->session;
+            if (!empty($session_conf->save_handler) && !empty($session_conf->save_path))
             {
                 if (!session_id())
                 {
-                    ini_set("session.save_handler", $this->config->session->save_handler);
-                    ini_set("session.save_path", $this->config->session->save_path);
+                    ini_set("session.save_handler", $session_conf->save_handler);
+                    ini_set("session.save_path", $session_conf->save_path);
                 }
             }
             $this->session = Yaf_Session::getInstance();
@@ -75,8 +64,8 @@ class ApplicationController extends Yaf_Controller_Abstract
      * When assign a public property to controller, this property will be
      * available to action view template too.
      *
-     * @param string $name  the name of the property
-     * @param mixed  $value the value of the property
+     * @param string $name the name of the property
+     * @param mixed $value the value of the property
      *
      * @return void
      */
@@ -86,36 +75,51 @@ class ApplicationController extends Yaf_Controller_Abstract
         $this->getView()->assignRef($name, $this->$name);
     }
 
-    public function getConfig()
+    /**
+     * 返回文本数据
+     * @param string|object $content
+     */
+    public function responseText($content)
     {
-        return $this->config;
+        $this->getResponse()->setBody($content);
     }
 
     /**
-     * 返回JSON格式数据
+     * 返回分页数据
+     * @param $total
+     * @param array $items
+     */
+    public function responsePageData($total, array $items)
+    {
+        $this->getResponse()->setBody(json_encode([
+            'total' => $total,
+            'data'  => $items,
+        ]));
+    }
+
+    /**
+     * 返回JSON数据
      * @param int $code
      * @param string $msg
      * @param string|object $content
      */
     public function responseJson($code, $msg, $content = '')
     {
-        $this->getResponse()->setBody(json_encode(array(
+        $this->getResponse()->setBody(json_encode([
             'code'    => $code,
             'message' => $msg,
             'content' => $content
-        )));
+        ]));
     }
 
     public function redirectNotFound()
     {
         $this->redirect('/error/notFound');
-        exit;
     }
 
     public function redirectAccessDenied()
     {
         $this->redirect('/error/accessDenied');
-        exit;
     }
 
 }

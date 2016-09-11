@@ -21,39 +21,6 @@
 class Bootstrap extends Yaf_Bootstrap_Abstract
 {
 
-    private $config;
-
-    private function _initBootstrap()
-    {
-        $this->config = Yaf_Application::app()->getConfig();
-    }
-
-    private function _initErrors(Yaf_Dispatcher $dispatcher)
-    {
-        error_reporting(-1);
-        //报错是否开启
-        if ($this->config->application->displayErrors)
-        {
-            ini_set('display_errors', 'On');
-        }
-        else
-        {
-            ini_set('display_errors', 'Off');
-        }
-
-        $dispatcher->setErrorHandler(array(__CLASS__, 'error_handler'));
-    }
-
-    private function _initTimezone()
-    {
-        ini_set("date.timezone", $this->config->application->timezone);
-    }
-
-    private function _initIncludePath()
-    {
-        // set_include_path(get_include_path() . PATH_SEPARATOR . $this->config->application->library);
-    }
-
     /**
      * 定义一些常量
      */
@@ -62,16 +29,43 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
         defined("__TIME__") || define("__TIME__", time());
         defined("__DATE__") || define("__DATE__", date('Y-m-d', __TIME__));
         defined("__DATETIME__") || define("__DATETIME__", date('Y-m-d H:i:s', __TIME__));
+        defined("CONF_PATH") || define("CONF_PATH", APP_PATH . '/config');
+    }
+
+    private function _initErrors(Yaf_Dispatcher $dispatcher)
+    {
+        error_reporting(-1);
+        //报错是否开启
+        if (Yaf_Application::app()->getConfig()->application->displayErrors)
+        {
+            ini_set('display_errors', 'On');
+        }
+        else
+        {
+            ini_set('display_errors', 'Off');
+        }
+
+        $dispatcher->setErrorHandler([__CLASS__, 'error_handler']);
+    }
+
+    private function _initTimezone()
+    {
+        ini_set("date.timezone", Yaf_Application::app()->getConfig()->application->timezone);
+    }
+
+    private function _initIncludePath()
+    {
+        // set_include_path(get_include_path() . PATH_SEPARATOR . $this->config->application->library);
     }
 
     private function _initFuntion()
     {
-        Yaf_Loader::import($this->config->application->library . '/Function.php');
+        Yaf_Loader::import(APP_PATH . '/include/Function.php');
     }
 
     //private function _initRequest(Yaf_Dispatcher $dispatcher)
     //{
-    //    $dispatcher->setRequest(new \eYaf\Request());
+    //    $dispatcher->setRequest(new \Request());
     //}
 
     /**
@@ -84,14 +78,14 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
         $dispatcher->disableView();
         // todo
         // 在这注册自己的view控制器
-        $layout = new \eYaf\Layout($this->config->application->layout->directory);
+        $layout = new \Layout(Yaf_Application::app()->getConfig()->application->layout->directory);
         $dispatcher->setView($layout);
     }
 
     private function _initPlugin(Yaf_Dispatcher $dispatcher)
     {
         $dispatcher->registerPlugin(new LogPlugin());
-        if($this->config->application->xhprof && extension_loaded('xhprof'))
+        if (Yaf_Application::app()->getConfig()->application->xhprof && extension_loaded('xhprof'))
         {
             $dispatcher->registerPlugin(new XhprofPlugin());
         }
@@ -119,7 +113,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
         // 添加自定义路由规则
         $router->addRoute('my_route', new Router());
 
-        $config = new Yaf_Config_Ini(APP_PATH . "/config/routes.ini");
+        $config = new Yaf_Config_Ini(CONF_PATH . "/routes.ini");
         $router->addConfig($config);
     }
 
@@ -158,10 +152,10 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
                 $uri = $argv [1];
                 if (preg_match('/^[^?]*%/i', $uri))
                 {
-                    list ( $module, $uri ) = explode('%', $uri, 2);
-                    if(isset($module))
+                    list ($module, $uri) = explode('%', $uri, 2);
+                    if (isset($module))
                     {
-                        $module  = strtolower($module);
+                        $module = strtolower($module);
                         if (in_array(ucfirst($module), Yaf_Application::app()->getModules()))
                         {
                             $request->setModuleName($module);
@@ -169,10 +163,10 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
                     }
                 }
 
-                $args = array();
+                $args = [];
                 if (false !== strpos($uri, '?'))
                 {
-                    list ( $uri, $args_str ) = explode('?', $uri, 2);
+                    list ($uri, $args_str) = explode('?', $uri, 2);
                     parse_str($args_str, $args);
                 }
                 $request->setRequestUri($uri);
@@ -190,9 +184,9 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
      * Catches all errors (not exceptions) and creates an ErrorException.
      * ErrorException then can caught by Yaf_ErrorController.
      *
-     * @param integer $errno   the error number.
-     * @param string  $errstr  the error message.
-     * @param string  $errfile the file where error occured.
+     * @param integer $errno the error number.
+     * @param string $errstr the error message.
+     * @param string $errfile the file where error occured.
      * @param integer $errline the line of the file where error occured.
      *
      * @throws ErrorException

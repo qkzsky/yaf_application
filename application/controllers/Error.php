@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Mi Framework
  *
@@ -25,7 +26,7 @@ class ErrorController extends Yaf_Controller_Abstract
     {
         try
         {
-            \eYaf\Logger::getLogger(str_replace('\\', '_', get_class($exception)))->logException($exception);
+            \Logger::getLogger(str_replace('\\', '_', get_class($exception)))->logException($exception);
         }
         catch (Exception $e)
         {
@@ -84,12 +85,12 @@ class ErrorController extends Yaf_Controller_Abstract
 
             $params = $this->getRequest()->getParams();
             unset($params['exception']);
-            $assign = array(
+            $assign = [
                 "e"              => $exception,
                 "e_class"        => get_class($exception),
                 "e_string_trace" => $exception->getTraceAsString(),
-                "params"         => array() + $params + $this->getRequest()->getQuery() + $this->getRequest()->getPost()
-            );
+                "params"         => [] + $params + $this->getRequest()->getQuery() + $this->getRequest()->getPost()
+            ];
             $this->display("exception", $assign);
         }
         else
@@ -98,7 +99,7 @@ class ErrorController extends Yaf_Controller_Abstract
         }
 
         end:
-        exit;
+            exit;
     }
 
     /**
@@ -106,11 +107,7 @@ class ErrorController extends Yaf_Controller_Abstract
      */
     public function notFoundAction()
     {
-        $assign = array(
-            'title'   => 'Error Not Found',
-            'content' => 'Page Not Found.'
-        );
-        $this->display('notfound', $assign);
+        $this->display('notfound');
     }
 
     /**
@@ -118,11 +115,7 @@ class ErrorController extends Yaf_Controller_Abstract
      */
     public function accessDeniedAction()
     {
-        $assign = array(
-            'title'   => 'Access Denied',
-            'content' => 'Access Denied.'
-        );
-        $this->display('accessdenied', $assign);
+        $this->display('accessdenied');
     }
 
 }

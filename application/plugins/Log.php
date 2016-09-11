@@ -1,11 +1,9 @@
 <?php
 
-use eYaf\Logger;
-
 class LogPlugin extends Yaf_Plugin_Abstract
 {
     /**
-     * @var \eYaf\Logger
+     * @var \Logger
      */
     private $logger;
 

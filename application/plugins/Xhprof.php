@@ -25,7 +25,7 @@ class XhprofPlugin extends Yaf_Plugin_Abstract
         $run_id      = $xhprof_runs->save_run($xhprof_data, $source);
         $xhprof_url  = "http://xhprof.me/index.php?source={$source}&run={$run_id}";
 
-        $logger = \eYaf\Logger::getLogger('xhprof');
+        $logger = \Logger::getLogger('xhprof');
         $logger->log("{$source}\t{$xhprof_url}");
         echo 'Xhprof: <a href="' . $xhprof_url . '">' . $source . '</a>';
     }
