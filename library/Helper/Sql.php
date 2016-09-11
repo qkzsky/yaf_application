@@ -12,9 +12,9 @@ class Sql
 
     /**
      * 生成查询的条件和绑定数组
-     * @param string $field         字段名
-     * @param string|array $values  值，IN的时候传数组
-     * @param string $op            操作符 =|>|<|like...
+     * @param string $field 字段名
+     * @param string|array $values 值，IN的时候传数组
+     * @param string $op 操作符 =|>|<|like...
      * @return array                array($condition, $bind)
      */
     public static function buildBindCondition($field, $values, $op = null)
@@ -53,7 +53,7 @@ class Sql
             {
                 $op = "=";
             }
-            $k             = str_replace('.', '_', ":{$field}");
+            $k = str_replace('.', '_', ":{$field}");
             $condition .= " {$field} {$op} {$k} ";
             $bind_data[$k] = $values;
         }
@@ -67,19 +67,20 @@ class Sql
      * @param int $page_index
      * @return string
      */
-    public static function buildLimit($page_size, $page_index = 1)
+    public static function buildLimit($page_size, $page_index = 0)
     {
         $limit = '';
         if ($page_size > 0)
         {
             // 每页条数不可大于最大限定值
-            $page_size = $page_size <= PAGE_SIZE_MAX ? (int)$page_size : PAGE_SIZE_MAX;
+            $page_size = $page_size <= PAGE_SIZE_MAX ? (int) $page_size : PAGE_SIZE_MAX;
             $limit .= ' LIMIT ' . $page_size;
-            if ($page_index > 0)
+            if ($page_index < 0)
             {
-                $offset = ($page_index - 1) * $page_size;
-                $limit .= ' OFFSET ' . ($offset >= 0 ? $offset : 0);
+                $page_index = 0;
             }
+            $offset = $page_index * $page_size;
+            $limit .= ' OFFSET ' . ($offset >= 0 ? $offset : 0);
         }
         return $limit;
     }
@@ -101,7 +102,7 @@ class Sql
                 $i = 0;
                 foreach ($sort_options as $sort => $order)
                 {
-                    if(in_array(strtolower($order), array('asc', 'desc')))
+                    if (in_array(strtolower($order), array('asc', 'desc')))
                     {
                         if ($i !== 0)
                         {
@@ -128,9 +129,10 @@ class Sql
     static public function string($string)
     {
         static $_str = array();
-        if(!isset($_str[$string]))
+        if (!isset($_str[$string]))
         {
-            $_str[$string] = function () use ($string) {
+            $_str[$string] = function() use ($string)
+            {
                 return $string;
             };
         }

@@ -126,7 +126,6 @@ class Mysql
             }
 
             $config = \Yaf_Application::app()->getConfig()->db->mysql;
-
             if (!isset($config) || !isset($config->$id))
             {
                 throw new \Exception("not found mysql_config for {$id}", E_ERROR);
@@ -188,7 +187,7 @@ class Mysql
             }
             catch (\PDOException $e)
             {
-                \eYaf\Logger::getLogger()->log('Caught exception: ' . $e->getMessage());
+                \Logger::getLogger()->log('Caught exception: ' . $e->getMessage());
                 try
                 {
                     $this->_db[$db_key] = new \PDO($dsn, $db_config->username, $db_config->password, $driver_options);
@@ -201,7 +200,7 @@ class Mysql
             $runtime = microtime(true) - $start_time;
             if ($runtime > self::CONNECT_TIMEOUT)
             {
-                \eYaf\Logger::getLogger()->log($runtime . '`MySQL connect slowly.' . "`{$dsn}");
+                \Logger::getLogger()->log($runtime . '`MySQL connect slowly.' . "`{$dsn}");
             }
         }
 
@@ -302,13 +301,13 @@ class Mysql
             $query_log = $sql . ";\t" . json_encode($parameters) . "\t" . "host:{$this->_curr_db_conf->host},port:{$this->_curr_db_conf->port},dbname:{$this->_curr_db_conf->dbname}";
             if (true === $this->_debug)
             {
-                \eYaf\Logger::getLogger('mysql_query')->logQuery($query_log, __CLASS__, $runtime);
+                \Logger::getLogger('mysql_query')->logQuery($query_log, __CLASS__, $runtime);
             }
 
             // 慢查询日志
             if ($runtime > self::SLOW_QUERY_TIME)
             {
-                \eYaf\Logger::getLogger('mysql_slow')->logQuery($query_log, __CLASS__, $runtime);
+                \Logger::getLogger('mysql_slow')->logQuery($query_log, __CLASS__, $runtime);
             }
         }
 
@@ -326,7 +325,8 @@ class Mysql
         {
             if (is_object($v) && $v instanceof DbString)
             {
-                $sql = str_replace($k, (string) $v, $sql);
+                $_k  = ($k[0] === ":") ? $k : ":{$k}";
+                $sql = str_replace($_k, (string) $v, $sql);
                 unset($parameters[$k]);
             }
         }

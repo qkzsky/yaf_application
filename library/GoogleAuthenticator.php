@@ -10,7 +10,6 @@
  * $QRCode    = GoogleAuthenticator::getQRCodeGoogleUrl($email, $secret, $title);
  * $is_verify = GoogleAuthenticator::verifyToken($secret, $token);
  */
-
 class GoogleAuthenticator
 {
 
@@ -121,6 +120,24 @@ class GoogleAuthenticator
     }
 
     /**
+     * Get QR-Code STR
+     *
+     * @param string $name
+     * @param string $secret
+     * @param string $title
+     * @return string
+     */
+    public static function getQRCodeStr($name, $secret, $title = null)
+    {
+        $str = "otpauth://totp/{$name}?secret={$secret}";
+        if (!empty($title))
+        {
+            $str .= "&issuer=" . urlencode($title);
+        }
+        return $str;
+    }
+
+    /**
      * Get QR-Code URL for image, from google charts
      *
      * @param string $name
@@ -130,11 +147,7 @@ class GoogleAuthenticator
      */
     public static function getQRCodeGoogleUrl($name, $secret, $title = null)
     {
-        $chl = "otpauth://totp/{$name}?secret={$secret}";
-        if (!empty($title))
-        {
-            $chl .= "&issuer=" . urlencode($title);
-        }
+        $chl = self::getQRCodeStr($name, $secret, $title);
         return 'https://chart.googleapis.com/chart?chs=200x200&chld=M|0&cht=qr&chl=' . urlencode($chl);
 //        return "http://chart.apis.google.com/chart?chs=200x200&chld=M|0&cht=qr&chl=" . urlencode($chl);
     }

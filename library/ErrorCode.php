@@ -20,8 +20,6 @@
 final class ErrorCode
 {
 
-    // 系统错误
-    const SYSTEM_ERROR      = -1;
     // 成功
     const SUCCESS           = 0;
     // 权限不足

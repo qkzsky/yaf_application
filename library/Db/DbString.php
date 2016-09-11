@@ -11,7 +11,7 @@ namespace Db;
 
 final class DbString
 {
-    static private $_static = array();
+    private static $_static = array();
     private        $value;
 
     public function __construct($value)
