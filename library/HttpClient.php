@@ -203,7 +203,7 @@ class HttpClient
         return true;
     }
 
-    public function setRequestFile($file, $postname = null, $filename = null)
+    public function setRequestFile($file, $filename = null, $post_name = null)
     {
         if (!is_readable($file))
         {
@@ -214,24 +214,24 @@ class HttpClient
         {
             $filename = basename($file);
         }
-        if ($postname === null)
+        if ($post_name === null)
         {
-            $postname = uniqid();
+            $post_name = uniqid();
         }
 
-        $finfo    = finfo_open(FILEINFO_MIME_TYPE);
-        $mimetype = finfo_file($finfo, $file);
+        $f_info    = finfo_open(FILEINFO_MIME_TYPE);
+        $mime_type = finfo_file($f_info, $file);
 
         if (function_exists('curl_file_create'))
         {
-            $cfile = curl_file_create($file, $mimetype, $filename);
+            $c_file = curl_file_create($file, $mime_type, $filename);
         }
         else
         {
-            $cfile = "@{$file};filename={$filename}"
-                . ($mimetype ? ";type={$mimetype}" : '');
+            $c_file = "@{$file};filename={$filename}"
+                . ($mime_type ? ";type={$mime_type}" : '');
         }
-        $this->_request_files[$postname] = $cfile;
+        $this->_request_files[$post_name] = $c_file;
 
         return true;
     }

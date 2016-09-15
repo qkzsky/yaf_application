@@ -26,11 +26,16 @@ class Template
      * 生成文件
      * @param $tpl_file
      * @return string
+     * @throws ErrorException
      */
-    function _createFile($tpl_file)
+    private function _createFile($tpl_file)
     {
         $tpl_real_file = realpath($tpl_file);
-        $compile_dir   = Yaf_Application::app()->getConfig()->application->compile;
+        if ($tpl_real_file === false)
+        {
+            throw new ErrorException("tpl file not found: {$tpl_file}", ErrorCode::SYS_FAILED);
+        }
+        $compile_dir = Yaf_Application::app()->getConfig()->application->compile;
         if (!file_exists($compile_dir))
         {
             mkdir($compile_dir, 0777, true);
@@ -51,7 +56,7 @@ class Template
      * @param string $src_file 源文件路径
      * @param string $dest_file 目标文件路径
      */
-    function _compile($src_file, $dest_file)
+    private function _compile($src_file, $dest_file)
     {
         $_content = file_get_contents($src_file);
         $_content = $this->parse($_content);
@@ -64,7 +69,7 @@ class Template
      * @param string $statement 后段
      * @return string
      */
-    function _stripvtags($expr, $statement)
+    private function _stripvtags($expr, $statement)
     {
         $expr      = str_replace("\\\"", "\"", preg_replace("/\<\?\=(\\\$.+?)\?\>/s", "\\1", $expr));
         $statement = str_replace("\\\"", "\"", $statement);
@@ -89,7 +94,7 @@ class Template
         $template = preg_replace("/{$this->left_delimiter}([a-zA-Z0-9_\\\[\]\'\"\$\x7f-\xff]+(::[a-zA-Z0-9_\[\]\'\"\$\x7f-\xff]+)){$this->right_delimiter}/is", "<?php echo \\1;?>", $template);// static
         $template = preg_replace("/{$this->left_delimiter}(\\\$[a-zA-Z0-9_\[\]\-\>'\"\.\$\x7f-\xff]+)\s*\|\s*default:\s*([^{$this->right_delimiter}]*){$this->right_delimiter}/is", "<?php if(isset(\\1)){echo \\1;}else{echo \\2;}?>", $template);
         // 函数
-        $template = preg_replace("/{$this->left_delimiter}([@&\\\$a-zA-Z0-9_:]+)\((.*?)\){$this->right_delimiter}/is", "<?php echo @\\1(\\2);?>", $template);
+        $template = preg_replace("/{$this->left_delimiter}([@&\\\$a-zA-Z0-9_:]+)\((.*?)\){$this->right_delimiter}/is", "<?php echo \\1(\\2);?>", $template);
         $template = preg_replace_callback("/([\n\r\t]*){$this->left_delimiter}elseif\s+(.+?){$this->right_delimiter}([\n\r\t]*)/is", function($matches)
         {
             return $this->_stripvtags("<?php } elseif({$matches[2]}) { ?>", '');

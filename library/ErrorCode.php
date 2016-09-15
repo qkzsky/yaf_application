@@ -23,12 +23,16 @@ final class ErrorCode
     // 成功
     const SUCCESS           = 0;
     // 权限不足
-    const PERMISSION_DENIED = 40001;
+    const PERMISSION_DENIED = 4001;
     // 无效的参数
-    const INVALID_PARAMETER = 40002;
+    const INVALID_PARAMETER = 4002;
     // 无效的格式
-    const INVALID_FORMAT    = 40003;
-    // 用户不存在
-    const USER_NOTFOUND     = 40004;
+    const INVALID_FORMAT = 4003;
+    // 系统错误
+    const SYS_FAILED = 5002;
+    // 操作失败
+    const OPERATION_FAILED = 5003;
+    // API调用失败
+    const API_FAILED = 6002;
 
 }

@@ -25,4 +25,5 @@ Thumbs.db
 .DS_Store
 
 # project
-log/*
+log/
+compile/
