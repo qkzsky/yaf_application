@@ -343,10 +343,7 @@ class Mysql
     public function fetchAll($sql, array $parameters = array(), $mode = \PDO::FETCH_ASSOC)
     {
         $result = $this->execute($sql, $parameters);
-        if ($result->rowCount() > 0)
-        {
-            $result->setFetchMode($mode);
-        }
+        $result->setFetchMode($mode);
         return $result->fetchAll();
     }
 
@@ -361,10 +358,7 @@ class Mysql
     public function fetchRow($sql, array $parameters = array(), $mode = \PDO::FETCH_ASSOC)
     {
         $result = $this->execute($sql, $parameters);
-        if ($result->rowCount() > 0)
-        {
-            $result->setFetchMode($mode);
-        }
+        $result->setFetchMode($mode);
         return $result->fetch();
     }
 
@@ -418,10 +412,7 @@ class Mysql
     public function fetchMap($sql, array $parameters = array(), array $key_fields = array(), array $val_fields = array(), $mode = \PDO::FETCH_ASSOC)
     {
         $result = $this->execute($sql, $parameters);
-        if ($result->rowCount() > 0)
-        {
-            $result->setFetchMode($mode);
-        }
+        $result->setFetchMode($mode);
         $val_fields = array_values($val_fields);
 
         $data = array();

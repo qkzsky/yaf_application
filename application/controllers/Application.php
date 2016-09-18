@@ -89,7 +89,7 @@ class ApplicationController extends Yaf_Controller_Abstract
      * @param $total
      * @param array $items
      */
-    public function responsePageData($total, array $items)
+    public function responsePageInfo($total, array $items)
     {
         $this->getResponse()->setBody(json_encode([
             'total' => $total,

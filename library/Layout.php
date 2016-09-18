@@ -277,19 +277,19 @@ class Layout implements \Yaf_View_Interface
      */
     public function render($tpl, $tpl_vars = array())
     {
-//        $content = $this->engine()->render($tpl, $tpl_vars);
+        $content = $this->engine()->render($tpl, $tpl_vars);
         // if no layout is defined,
         // return the rendered view template
-        $template_file = Template::compile($this->getScriptPath() . '/' . $tpl);
-        $content       = $this->engine()->render($template_file, $tpl_vars);
+//        $template_file = Template::compile($this->getScriptPath() . '/' . $tpl);
+//        $content       = $this->engine()->render($template_file, $tpl_vars);
         if (null === $this->layout)
         {
             return $content;
         }
 
         $this->assign('_content_', $content);
-//        $template_file = $this->getLayoutPath();
-        $template_file = Template::compile($this->getLayoutPath());
+        $template_file = $this->getLayoutPath();
+//        $template_file = Template::compile($this->getLayoutPath());
         return $this->engine()->render($template_file, $tpl_vars);
     }
 
