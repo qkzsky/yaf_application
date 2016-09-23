@@ -21,17 +21,6 @@
 class Bootstrap extends Yaf_Bootstrap_Abstract
 {
 
-    /**
-     * 定义一些常量
-     */
-    private function _initConstant()
-    {
-        defined("__TIME__") || define("__TIME__", time());
-        defined("__DATE__") || define("__DATE__", date('Y-m-d', __TIME__));
-        defined("__DATETIME__") || define("__DATETIME__", date('Y-m-d H:i:s', __TIME__));
-        defined("CONF_PATH") || define("CONF_PATH", APP_PATH . '/config');
-    }
-
     private function _initErrors(Yaf_Dispatcher $dispatcher)
     {
         error_reporting(-1);
@@ -46,6 +35,17 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
         }
 
         $dispatcher->setErrorHandler([__CLASS__, 'error_handler']);
+    }
+
+    /**
+     * 定义一些常量
+     */
+    private function _initConstant()
+    {
+        defined("__TIME__") || define("__TIME__", time());
+        defined("__DATE__") || define("__DATE__", date('Y-m-d', __TIME__));
+        defined("__DATETIME__") || define("__DATETIME__", date('Y-m-d H:i:s', __TIME__));
+        defined("CONF_PATH") || define("CONF_PATH", APP_PATH . '/config');
     }
 
     private function _initTimezone()

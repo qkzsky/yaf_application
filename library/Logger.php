@@ -61,7 +61,7 @@ class Logger extends \SplFileObject
         self::$start_time = microtime(true);
         self::$memory     = memory_get_usage(true);
         $buffer           = self::colorString("Started at : [" . date('Y-m-d H:i:s', time()) . "]", self::GREEN);
-        $this->log($buffer);
+        $this->write($buffer);
     }
 
     public function stopLogging()
@@ -72,10 +72,15 @@ class Logger extends \SplFileObject
             . "Mem Usage: ("
             . number_format((memory_get_usage(true) - self::$memory) / (1024), 0, ",", ".")
             . " kb)", self::GREEN);
-        $this->log($buffer);
+        $this->write($buffer);
     }
 
     public function log($string)
+    {
+        $this->write($string);
+    }
+
+    private function write($string)
     {
         $traces = debug_backtrace(false);
         array_shift($traces);
@@ -101,7 +106,7 @@ class Logger extends \SplFileObject
     public function emergency($message, array $context = array())
     {
         $buffer = self::colorString("[" . self::EMERGENCY . "]\t" . $this->interpolate($message, $context), self::PURPLE);
-        $this->log($buffer);
+        $this->write($buffer);
     }
 
     /**
@@ -113,7 +118,7 @@ class Logger extends \SplFileObject
     public function alert($message, array $context = array())
     {
         $buffer = self::colorString("[" . self::ALERT . "]\t" . $this->interpolate($message, $context), self::PURPLE);
-        $this->log($buffer);
+        $this->write($buffer);
     }
 
     /**
@@ -125,7 +130,7 @@ class Logger extends \SplFileObject
     public function critical($message, array $context = array())
     {
         $buffer = self::colorString("[" . self::CRITICAL . "]\t" . $this->interpolate($message, $context), self::PURPLE);
-        $this->log($buffer);
+        $this->write($buffer);
     }
 
     /**
@@ -136,7 +141,7 @@ class Logger extends \SplFileObject
     public function error($message, array $context = array())
     {
         $buffer = self::colorString("[" . self::ERROR . "]\t" . $this->interpolate($message, $context), self::RED);
-        $this->log($buffer);
+        $this->write($buffer);
     }
 
     /**
@@ -148,7 +153,7 @@ class Logger extends \SplFileObject
     public function warning($message, array $context = array())
     {
         $buffer = self::colorString("[" . self::WARNING . "]\t" . $this->interpolate($message, $context), self::YELLOW);
-        $this->log($buffer);
+        $this->write($buffer);
     }
 
     /**
@@ -159,7 +164,7 @@ class Logger extends \SplFileObject
     public function notice($message, array $context = array())
     {
         $buffer = self::colorString("[" . self::NOTICE . "]\t" . $this->interpolate($message, $context), self::WHITE);
-        $this->log($buffer);
+        $this->write($buffer);
     }
 
     /**
@@ -171,7 +176,7 @@ class Logger extends \SplFileObject
     public function info($message, array $context = array())
     {
         $buffer = self::colorString("[" . self::INFO . "]\t" . $this->interpolate($message, $context), self::CYAN);
-        $this->log($buffer);
+        $this->write($buffer);
     }
 
     /**
@@ -182,7 +187,7 @@ class Logger extends \SplFileObject
     public function debug($message, array $context = array())
     {
         $buffer = self::colorString("[" . self::DEBUG . "]\t" . $this->interpolate($message, $context), self::CYAN);
-        $this->log($buffer);
+        $this->write($buffer);
     }
 
     public function logQuery($query, $class_name = null, $parse_time = 0, $action = 'Load')
@@ -192,7 +197,7 @@ class Logger extends \SplFileObject
                 . number_format($parse_time * 1000, '4')
                 . "ms)  ", self::PURPLE)
             . self::colorString($query, self::CYAN);
-        $this->log($buffer);
+        $this->write($buffer);
     }
 
     public function logRequest(\Yaf_Request_Abstract $request)
@@ -208,7 +213,7 @@ class Logger extends \SplFileObject
         $params = array() + $request->getParams() + $request->getQuery() + $request->getPost() + $request->getFiles();
         $log .= "Parameters: " . trim(print_r($params, true));
 
-        $this->log($log);
+        $this->write($log);
     }
 
     public function logException($exception)
@@ -222,7 +227,7 @@ class Logger extends \SplFileObject
             . "\n"
             . $exception->getTraceAsString();
 
-        $this->log($log);
+        $this->write($log);
     }
 
     /**
