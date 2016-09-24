@@ -93,7 +93,7 @@ class ApplicationController extends Yaf_Controller_Abstract
     {
         $this->getResponse()->setBody(json_encode([
             'total' => $total,
-            'data'  => $items,
+            'items' => $items,
         ]));
     }
 
