@@ -15,7 +15,7 @@ class Router implements Yaf_Route_Interface
     {
         $uri = explode('/', trim($request->getRequestUri(), '/'));
         // 路径中第一级只要匹配上module名称, 就统一定向至module处理
-        if (in_array(ucfirst(strtolower($uri[0])), Yaf_Application::app()->getModules()))
+        if (!$request->getModuleName() && in_array(ucfirst(strtolower($uri[0])), Yaf_Application::app()->getModules()))
         {
             $request->setModuleName($uri[0]);
             isset($uri[1]) && $request->setControllerName($uri[1]);
