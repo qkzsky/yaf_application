@@ -48,7 +48,7 @@ class Logger extends \SplFileObject
         $env = $env ?: YAF_ENVIRON;
         if (!isset(static::$logger_instance[$env]) || !(static::$logger_instance[$env] instanceof self))
         {
-            $log_path = \Yaf_Registry::get('scm_config')->application->log;
+            $log_path = \Yaf_Application::app()->getConfig()->application->log;
             $filename = $log_path . "/" . $env . '.log';
             mk_dir(dirname($filename));
             static::$logger_instance[$env] = new static($filename, $open_mode);

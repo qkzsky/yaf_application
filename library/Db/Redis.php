@@ -55,11 +55,11 @@ class Redis
                     $redis->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_NONE);
                     break;
             }
-            if ($db_config->db !== '')
+            if (isset($db_config->db) && $db_config->db !== '')
             {
                 $redis->select($db_config->db);
             }
-            if (isset($db_config->auth))
+            if (isset($db_config->auth) && isset($db_config->auth))
             {
                 $redis->auth($db_config->auth);
             }
