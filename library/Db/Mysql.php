@@ -326,7 +326,7 @@ class Mysql
             if (is_object($v) && $v instanceof DbString)
             {
                 $_k  = ($k[0] === ":") ? $k : ":{$k}";
-                $sql = str_replace($_k, (string) $v, $sql);
+                $sql = preg_replace("/({$_k}([^\w]|$))/", (string) $v . "$2", $sql);
                 unset($parameters[$k]);
             }
         }
@@ -553,6 +553,7 @@ class Mysql
      * @param array $data 二维数组
      * @param array $fields 指定需要插入的值, 为空则使用$data中所有key
      * @param string $type insert|ignore|replace
+     * @throws \ErrorException
      */
     public function insertMulti($table, array $data, array $fields = array(), $type = 'insert')
     {
@@ -562,6 +563,10 @@ class Mysql
         $i          = 0;
         foreach ($data as $row)
         {
+            if (count(array_diff($fields, array_keys($row))) > 0)
+            {
+                throw new \ErrorException("insert multi must have the same key.");
+            }
             $i++;
             $value = null;
             foreach ($fields as $key)
@@ -616,6 +621,7 @@ class Mysql
      * @param array $in_data 插入的数据(二维数组)
      * @param array $up_data 更新的数据(一维数组)
      * @param array $fields 指定需要插入的值, 为空则使用$in_data第一个中所有key
+     * @throws \ErrorException
      */
     public function insertUpdateMulti($table, array $in_data, array $up_data, array $fields = array())
     {
@@ -625,6 +631,10 @@ class Mysql
         $i          = 0;
         foreach ($in_data as $row)
         {
+            if (count(array_diff($fields, array_keys($row))) > 0)
+            {
+                throw new \ErrorException("insert update multi must have the same key.");
+            }
             $i++;
             $value = null;
             foreach ($fields as $key)
@@ -716,14 +726,14 @@ class Mysql
                 throw new \Exception("未在数据中找到更新的条件字段 {$index_field}", E_ERROR);
             }
 
-            foreach ($row_keys as $key)
+            foreach ($row_keys as $n => $key)
             {
                 if ($key === $index_field)
                 {
                     continue;
                 }
 
-                $bind_index_key              = ":_index_field_{$i}";
+                $bind_index_key              = ":_index_field_{$n}_{$i}";
                 $bind_value_key              = ":_{$key}_{$i}";
                 $parameters[$bind_index_key] = $row[$index_field];
                 $parameters[$bind_value_key] = $row[$key];
