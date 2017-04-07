@@ -29,7 +29,7 @@
         <h2 style="margin-top: 30px;">Request</h2>
         <p>
             <b>Parameters: </b>
-            <pre><?php print_r($params)?></pre>
+        <pre><?=\Helper\Html::encode(print_r($params, true))?></pre>
         </p>
-</body>
+    </body>
 </html>

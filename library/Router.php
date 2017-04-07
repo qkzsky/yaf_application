@@ -35,7 +35,7 @@ class Router implements Yaf_Route_Interface
         }
     }
 
-    public function assemble(array $info, array $query = array())
+    public function assemble(array $info, array $query = null)
     {
         return true;
     }

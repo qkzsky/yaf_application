@@ -75,7 +75,7 @@ class Mysql
     /**
      * 持久化链接
      */
-    private $_p_connect = false;
+    private $_p_connect = true;
 
     /**
      * 默认字符集编码
@@ -104,8 +104,7 @@ class Mysql
         $this->_db_config = $db_config;
 
         $config = \Yaf_Application::app()->app()->getConfig();
-        if ($config->application->sqlDebug)
-        {
+        if ($config->application->sqlDebug) {
             $this->setDebug(true);
         }
     }
@@ -118,16 +117,13 @@ class Mysql
      */
     static public function getInstance($id = 'default')
     {
-        if (!isset(self::$_instances[$id]))
-        {
-            if (!extension_loaded('pdo_mysql'))
-            {
+        if (!isset(self::$_instances[$id])) {
+            if (!extension_loaded('pdo_mysql')) {
                 throw new \Exception('not found extension pdo_mysql', E_ERROR);
             }
 
             $config = \Yaf_Application::app()->getConfig()->db->mysql;
-            if (!isset($config) || !isset($config->$id))
-            {
+            if (!isset($config) || !isset($config->$id)) {
                 throw new \Exception("not found mysql_config for {$id}", E_ERROR);
             }
             $db_config = $config->$id;
@@ -145,23 +141,17 @@ class Mysql
     {
         $db_key = "db_";
         // 取得配置
-        if (isset($this->_db_config->master))
-        {
+        if (isset($this->_db_config->master)) {
             // 事务中和增删改操作主库
-            if ($this->_is_trans || $this->_is_write)
-            {
-                $db_key .= "master";
+            if ($this->_is_trans || $this->_is_write) {
+                $db_key    .= "master";
                 $db_config = $this->_db_config->master;
-            }
-            else
-            {
-                $db_key .= "slave";
+            } else {
+                $db_key    .= "slave";
                 $db_config = $this->_db_config->slave;
             }
-        }
-        else
-        {
-            $db_key .= "default";
+        } else {
+            $db_key    .= "default";
             $db_config = $this->_db_config;
         }
 
@@ -169,38 +159,31 @@ class Mysql
         $this->_curr_db_conf = $db_config;
 
         // 链接
-        if (!isset($this->_db[$db_key]))
-        {
+        if (!isset($this->_db[$db_key])) {
             $charset        = $db_config->charset ?: $this->_charset;
             $dsn            = "mysql:host={$db_config->host};port={$db_config->port};dbname={$db_config->dbname};charset={$charset};";
             $driver_options = array(
                 \PDO::ATTR_EMULATE_PREPARES   => false,
+                \PDO::ATTR_TIMEOUT            => self::CONNECT_TIMEOUT,
                 \PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
                 \PDO::ATTR_PERSISTENT         => $this->_p_connect,
                 \PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES '{$charset}'",
             );
 
             $start_time = microtime(true);
-            try
-            {
+            try {
                 $this->_db[$db_key] = new \PDO($dsn, $db_config->username, $db_config->password, $driver_options);
-            }
-            catch (\PDOException $e)
-            {
+            } catch (\PDOException $e) {
                 \Logger::getLogger()->log('Caught exception: ' . $e->getMessage());
-                try
-                {
+                try {
                     $this->_db[$db_key] = new \PDO($dsn, $db_config->username, $db_config->password, $driver_options);
-                }
-                catch (\PDOException $e)
-                {
+                } catch (\PDOException $e) {
                     throw $e;
                 }
             }
             $runtime = microtime(true) - $start_time;
-            if ($runtime > self::CONNECT_TIMEOUT)
-            {
-                \Logger::getLogger()->log($runtime . '`MySQL connect slowly.' . "`{$dsn}");
+            if ($runtime > self::CONNECT_TIMEOUT) {
+                \Logger::getLogger()->log('(' . number_format($runtime * 1000, '4') . 'ms）`MySQL connect slowly.' . "`{$dsn}");
             }
         }
 
@@ -212,8 +195,7 @@ class Mysql
      */
     public function disconnect()
     {
-        if (!empty($this->_db))
-        {
+        if (!empty($this->_db)) {
             $this->_db  = array();
             $this->_pdo = null;
         }
@@ -238,8 +220,7 @@ class Mysql
     public function execute($sql, array $parameters = array())
     {
         // 如果是写操作，一定走主库
-        if (preg_match('/^\s*(SET|INSERT|UPDATE|DELETE|REPLACE|CREATE|DROP|TRUNCATE|LOAD DATA|COPY|ALTER|GRANT|REVOKE|LOCK|UNLOCK)\s+/i', $sql))
-        {
+        if (preg_match('/^\s*(SET|INSERT|UPDATE|DELETE|REPLACE|CREATE|DROP|TRUNCATE|LOAD DATA|COPY|ALTER|GRANT|REVOKE|LOCK|UNLOCK)\s+/i', $sql)) {
             $this->_is_write = true;
         }
 
@@ -251,62 +232,47 @@ class Mysql
         $start_time = microtime(true);
 
         $this->_last_sql = $sql;
-        try
-        {
+        try {
             $this->_pdo_statement = $this->_pdo->prepare($sql);
             $this->_pdo_statement->execute($parameters);
-        }
-        catch (\PDOException $e)
-        {
+        } catch (\PDOException $e) {
             // 服务端断开时重连一次
-            if (!empty($e->errorInfo[1]) && ($e->errorInfo[1] === 2006 || $e->errorInfo[1] === 2013))
-            {
+            if (!empty($e->errorInfo[1]) && ($e->errorInfo[1] === 2006 || $e->errorInfo[1] === 2013)) {
                 $this->disconnect();
                 // 事务中为保证事务完整性不进行重连
-                if ($this->_is_trans)
-                {
+                if ($this->_is_trans) {
                     $this->rollback();
                     throw $e;
                 }
 
                 $this->connect();
-                try
-                {
+                try {
                     $this->_pdo_statement = $this->_pdo->prepare($sql);
                     $this->_pdo_statement->execute($parameters);
-                }
-                catch (\PDOException $ex)
-                {
+                } catch (\PDOException $ex) {
                     $this->rollback();
                     throw $ex;
                 }
-            }
-            else
-            {
+            } else {
                 $this->rollback();
                 throw $e;
             }
         }
 
-        if ($this->_pdo_statement->errorCode() !== '00000')
-        {
+        if ($this->_pdo_statement->errorCode() !== '00000') {
             $errors  = $this->_pdo_statement->errorInfo();
             $message = "ERROR_NUMBER: {$errors[1]} ERROR_INFO: {$errors[2]} ERROR_SQL: {$sql} SQL_DATA: {" . json_encode($parameters) . "}";
             throw new \Exception($message, E_ERROR);
-        }
-        else
-        {
+        } else {
             // 记录日志
             $runtime   = microtime(true) - $start_time;
             $query_log = $sql . ";\t" . json_encode($parameters) . "\t" . "host:{$this->_curr_db_conf->host},port:{$this->_curr_db_conf->port},dbname:{$this->_curr_db_conf->dbname}";
-            if (true === $this->_debug)
-            {
+            if (true === $this->_debug) {
                 \Logger::getLogger('mysql_query')->logQuery($query_log, __CLASS__, $runtime);
             }
 
             // 慢查询日志
-            if ($runtime > self::SLOW_QUERY_TIME)
-            {
+            if ($runtime > self::SLOW_QUERY_TIME) {
                 \Logger::getLogger('mysql_slow')->logQuery($query_log, __CLASS__, $runtime);
             }
         }
@@ -321,10 +287,8 @@ class Mysql
      */
     private function formatSqlData(&$sql, array &$parameters)
     {
-        foreach ($parameters as $k => $v)
-        {
-            if (is_object($v) && $v instanceof DbString)
-            {
+        foreach ($parameters as $k => $v) {
+            if (is_object($v) && $v instanceof DbString) {
                 $_k  = ($k[0] === ":") ? $k : ":{$k}";
                 $sql = preg_replace("/({$_k}([^\w]|$))/", (string) $v . "$2", $sql);
                 unset($parameters[$k]);
@@ -371,14 +335,12 @@ class Mysql
     public function fetchCol($sql, array $parameters = array())
     {
         $rs = $this->fetchAll($sql, $parameters);
-        if (empty($rs) && !is_array($rs))
-        {
+        if (empty($rs) && !is_array($rs)) {
             return $rs;
         }
 
         $data = array();
-        foreach ($rs as $row)
-        {
+        foreach ($rs as $row) {
             $data[] = array_shift($row);
         }
 
@@ -416,28 +378,20 @@ class Mysql
         $val_fields = array_values($val_fields);
 
         $data = array();
-        while ($row = $result->fetch())
-        {
+        while ($row = $result->fetch()) {
             $key_string = '';
-            foreach ($key_fields as $key)
-            {
+            foreach ($key_fields as $key) {
                 $key_string .= "[" . (isset($row[$key]) ? "'{$row[$key]}'" : '') . "]";
             }
 
             $val_data = array();
-            if (empty($val_fields))
-            {
+            if (empty($val_fields)) {
                 $val_data = $row;
-            }
-            elseif (count($val_fields) === 1)
-            {
+            } elseif (count($val_fields) === 1) {
                 $val_key  = $val_fields[0];
                 $val_data = isset($row[$val_key]) ? $row[$val_key] : null;
-            }
-            else
-            {
-                foreach ($val_fields as $val_key)
-                {
+            } else {
+                foreach ($val_fields as $val_key) {
                     $val_data[$val_key] = isset($row[$val_key]) ? $row[$val_key] : null;
                 }
             }
@@ -457,8 +411,7 @@ class Mysql
     {
         $s_list     = array();
         $parameters = array();
-        foreach ($data as $k => $v)
-        {
+        foreach ($data as $k => $v) {
             $bind_key              = ":_{$k}_";
             $s_list[]              = "`{$k}`={$bind_key}";
             $parameters[$bind_key] = $v;
@@ -477,8 +430,7 @@ class Mysql
     {
         $s_list     = array();
         $parameters = array();
-        foreach ($data as $k => $v)
-        {
+        foreach ($data as $k => $v) {
             $bind_key              = ":_{$k}_";
             $s_list[]              = "`{$k}`={$bind_key}";
             $parameters[$bind_key] = $v;
@@ -497,8 +449,7 @@ class Mysql
     {
         $s_list     = array();
         $parameters = array();
-        foreach ($data as $k => $v)
-        {
+        foreach ($data as $k => $v) {
             $bind_key              = ":_{$k}_";
             $s_list[]              = "`{$k}`={$bind_key}";
             $parameters[$bind_key] = $v;
@@ -529,14 +480,12 @@ class Mysql
         $in_list    = array();
         $up_list    = array();
         $parameters = array();
-        foreach ($in_data as $k => $v)
-        {
+        foreach ($in_data as $k => $v) {
             $bind_key              = ":i_{$k}_";
             $in_list[]             = "`{$k}`={$bind_key}";
             $parameters[$bind_key] = $v;
         }
-        foreach ($up_data as $k => $v)
-        {
+        foreach ($up_data as $k => $v) {
             $bind_key              = ":u_{$k}_";
             $up_list[]             = "`{$k}`={$bind_key}";
             $parameters[$bind_key] = $v;
@@ -561,20 +510,17 @@ class Mysql
         $values     = '';
         $parameters = array();
         $i          = 0;
-        foreach ($data as $row)
-        {
-            if (count(array_diff($fields, array_keys($row))) > 0)
-            {
+        foreach ($data as $row) {
+            if (count(array_diff($fields, array_keys($row))) > 0) {
                 throw new \ErrorException("insert multi must have the same key.");
             }
             $i++;
             $value = null;
-            foreach ($fields as $key)
-            {
+            foreach ($fields as $key) {
                 $bind_key              = ":_{$key}_{$i}_";
                 $val                   = isset($row[$key]) ? $row[$key] : null;
                 $parameters[$bind_key] = $val;
-                $value .= "{$bind_key},";
+                $value                 .= "{$bind_key},";
             }
             $values .= '(' . trim($value, ',') . '),';
         }
@@ -582,8 +528,7 @@ class Mysql
         $values = trim($values, ',');
 
         $sql_before = null;
-        switch ($type)
-        {
+        switch ($type) {
             case 'replace':
                 $sql_before = 'REPLACE';
                 break;
@@ -629,20 +574,17 @@ class Mysql
         $values     = '';
         $parameters = array();
         $i          = 0;
-        foreach ($in_data as $row)
-        {
-            if (count(array_diff($fields, array_keys($row))) > 0)
-            {
+        foreach ($in_data as $row) {
+            if (count(array_diff($fields, array_keys($row))) > 0) {
                 throw new \ErrorException("insert update multi must have the same key.");
             }
             $i++;
             $value = null;
-            foreach ($fields as $key)
-            {
+            foreach ($fields as $key) {
                 $bind_key              = ":i_{$key}_{$i}_";
                 $val                   = isset($row[$key]) ? $row[$key] : null;
                 $parameters[$bind_key] = $val;
-                $value .= "{$bind_key},";
+                $value                 .= "{$bind_key},";
             }
             $values .= '(' . trim($value, ',') . '),';
         }
@@ -650,8 +592,7 @@ class Mysql
         $values = trim($values, ',');
 
         $up_list = array();
-        foreach ($up_data as $k => $v)
-        {
+        foreach ($up_data as $k => $v) {
             $bind_key              = ":u_{$k}_";
             $up_list[]             = "`{$k}`={$bind_key}";
             $parameters[$bind_key] = $v;
@@ -685,16 +626,14 @@ class Mysql
     {
         $s_list     = array();
         $parameters = array();
-        foreach ($data as $k => $v)
-        {
+        foreach ($data as $k => $v) {
             $bind_key              = ":_{$k}_";
             $s_list[]              = "`{$k}`={$bind_key}";
             $parameters[$bind_key] = $v;
         }
 
         // 如果指定了条件，则跟上条件串
-        if (!empty($condition))
-        {
+        if (!empty($condition)) {
             $condition = " WHERE " . $condition;
         }
 
@@ -717,19 +656,15 @@ class Mysql
         $parameters = array();
         $field_case = array();
         $i          = 0;
-        foreach ($data as $row)
-        {
+        foreach ($data as $row) {
             $i++;
             $row_keys = array_keys($row);
-            if (!isset($row[$index_field]))
-            {
+            if (!isset($row[$index_field])) {
                 throw new \Exception("未在数据中找到更新的条件字段 {$index_field}", E_ERROR);
             }
 
-            foreach ($row_keys as $n => $key)
-            {
-                if ($key === $index_field)
-                {
+            foreach ($row_keys as $n => $key) {
+                if ($key === $index_field) {
                     continue;
                 }
 
@@ -742,15 +677,13 @@ class Mysql
             }
         }
 
-        foreach ($field_case as $field => $v)
-        {
+        foreach ($field_case as $field => $v) {
             $case     = "`{$field}`=CASE " . implode($v, ' ') . " ELSE `{$field}` END";
             $s_list[] = $case;
         }
 
         // 如果指定了条件，则跟上条件串
-        if (!empty($condition))
-        {
+        if (!empty($condition)) {
             $condition = " WHERE " . $condition;
         }
 
@@ -766,8 +699,7 @@ class Mysql
      */
     public function delete($table, $condition, array $cond_parameters = array())
     {
-        if (!empty($condition))
-        {
+        if (!empty($condition)) {
             $condition = " WHERE " . $condition;
         }
 
@@ -810,8 +742,7 @@ class Mysql
     {
         $this->_is_trans = true;
         $this->connect();
-        if (!$this->_pdo->inTransaction())
-        {
+        if (!$this->_pdo->inTransaction()) {
             return $this->_pdo->beginTransaction();
         }
         return false;
@@ -824,8 +755,7 @@ class Mysql
     public function commit()
     {
         $this->_is_trans = false;
-        if (!is_null($this->_pdo) && $this->_pdo->inTransaction())
-        {
+        if (!is_null($this->_pdo) && $this->_pdo->inTransaction()) {
             return $this->_pdo->commit();
         }
         return false;
@@ -838,8 +768,7 @@ class Mysql
     public function rollback()
     {
         $this->_is_trans = false;
-        if (!is_null($this->_pdo) && $this->_pdo->inTransaction())
-        {
+        if (!is_null($this->_pdo) && $this->_pdo->inTransaction()) {
             return $this->_pdo->rollback();
         }
         return false;
