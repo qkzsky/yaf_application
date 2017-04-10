@@ -32,6 +32,11 @@ class Mysql
     const SLOW_QUERY_TIME = 1;
 
     /**
+     * 重试次数
+     */
+    const RETRY_ATTEMPTS = 1;
+
+    /**
      * 实例
      */
     private static $_instances = array();
@@ -167,17 +172,20 @@ class Mysql
                 \PDO::ATTR_TIMEOUT            => self::CONNECT_TIMEOUT,
                 \PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
                 \PDO::ATTR_PERSISTENT         => $this->_p_connect,
-                \PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES '{$charset}'",
+                \PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES {$charset}",
             );
 
-            $start_time = microtime(true);
+            $start_time    = microtime(true);
+            $retry_attempt = 0;
+            try_connect:
             try {
                 $this->_db[$db_key] = new \PDO($dsn, $db_config->username, $db_config->password, $driver_options);
-            } catch (\PDOException $e) {
+            } catch (\Exception $e) {
                 \Logger::getLogger()->log('Caught exception: ' . $e->getMessage());
-                try {
-                    $this->_db[$db_key] = new \PDO($dsn, $db_config->username, $db_config->password, $driver_options);
-                } catch (\PDOException $e) {
+                if ($retry_attempt < self::RETRY_ATTEMPTS) {
+                    $retry_attempt++;
+                    goto try_connect;
+                } else {
                     throw $e;
                 }
             }
