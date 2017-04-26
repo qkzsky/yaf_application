@@ -33,12 +33,6 @@ class HttpClient
     private $_request_data;
 
     /**
-     * 需要上传的文件
-     * @var array
-     */
-    private $_request_files = array();
-
-    /**
      * 请求方法，默认是POST 方法
      * @var string
      */
@@ -172,12 +166,9 @@ class HttpClient
      */
     public function setCookie($data)
     {
-        if (is_array($data))
-        {
+        if (is_array($data)) {
             $this->_request_cookie = http_build_query($data, '', ';');
-        }
-        else
-        {
+        } else {
             $this->_request_cookie = $data;
         }
 
@@ -191,49 +182,45 @@ class HttpClient
      */
     public function setRequestBody($data)
     {
-        if (is_array($data))
-        {
-            $this->_request_data = http_build_query($data);
-        }
-        else
-        {
-            $this->_request_data = $data;
-        }
+//        if (is_array($data))
+//        {
+//            $this->_request_data = http_build_query($data);
+//        }
+//        else
+//        {
+        $this->_request_data = $data;
+//        }
 
         return true;
     }
 
-    public function setRequestFile($file, $filename = null, $post_name = null)
+    /**
+     * @param $file
+     * @param null $filename
+     * @return CURLFile|string
+     * @throws Exception
+     */
+    public function fileCreate($file, $filename = null)
     {
-        if (!is_readable($file))
-        {
-            return false;
+        if (!is_readable($file)) {
+            throw new Exception("file not found!");
         }
 
-        if ($filename === null)
-        {
+        if ($filename === null) {
             $filename = basename($file);
-        }
-        if ($post_name === null)
-        {
-            $post_name = uniqid();
         }
 
         $f_info    = finfo_open(FILEINFO_MIME_TYPE);
         $mime_type = finfo_file($f_info, $file);
 
-        if (function_exists('curl_file_create'))
-        {
+        if (function_exists('curl_file_create')) {
             $c_file = curl_file_create($file, $mime_type, $filename);
-        }
-        else
-        {
+        } else {
             $c_file = "@{$file};filename={$filename}"
                 . ($mime_type ? ";type={$mime_type}" : '');
         }
-        $this->_request_files[$post_name] = $c_file;
 
-        return true;
+        return $c_file;
     }
 
     /**
@@ -242,8 +229,7 @@ class HttpClient
      */
     public function setMethod($method)
     {
-        if (!in_array(strtoupper($method), array('POST', 'GET')))
-        {
+        if (!in_array(strtoupper($method), array('POST', 'GET'))) {
             $method = 'GET';
         }
 
@@ -259,8 +245,7 @@ class HttpClient
      */
     public function setCertInfo($cert_file, $cert_passwd = '', $cert_type = "PEM")
     {
-        if (!is_readable($cert_file) || empty($cert_type))
-        {
+        if (!is_readable($cert_file) || empty($cert_type)) {
             return false;
         }
         $this->_cert_file   = $cert_file;
@@ -276,8 +261,7 @@ class HttpClient
      */
     public function setCaInfo($ca_file)
     {
-        if (!is_readable($ca_file))
-        {
+        if (!is_readable($ca_file)) {
             return false;
         }
         $this->_ca_file = $ca_file;
@@ -302,8 +286,7 @@ class HttpClient
      */
     public function setRequestHeader(array $headers)
     {
-        if (empty($headers))
-        {
+        if (empty($headers)) {
             return false;
         }
 
@@ -318,8 +301,7 @@ class HttpClient
      */
     public function setUserAgent($user_agent)
     {
-        if (!empty($user_agent))
-        {
+        if (!empty($user_agent)) {
             $this->_user_agent = $user_agent;
         }
 
@@ -378,12 +360,10 @@ class HttpClient
     public function getResponseCookie()
     {
         $_cookie = array();
-        if (!empty($this->_response_header))
-        {
+        if (!empty($this->_response_header)) {
             $temp = array();
             preg_match_all('/Set-Cookie:\s*([^=]+)=([^;]+);*/i', $this->_response_header, $temp);
-            if (is_array($temp) && isset($temp[1]) && isset($temp[2]))
-            {
+            if (is_array($temp) && isset($temp[1]) && isset($temp[2])) {
                 $_cookie = array_combine($temp[1], array_map('urldecode', $temp[2]));
             }
         }
@@ -414,8 +394,7 @@ class HttpClient
      */
     public function exec()
     {
-        if (empty($this->_request_url))
-        {
+        if (empty($this->_request_url)) {
             return false;
         }
 
@@ -423,73 +402,53 @@ class HttpClient
         curl_setopt($ch, CURLOPT_NOSIGNAL, 1);
         curl_setopt($ch, CURLOPT_TIMEOUT_MS, $this->_timeout);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        if (defined('CURLOPT_IPRESOLVE') && defined('CURL_IPRESOLVE_V4'))
-        {
+        if (defined('CURLOPT_IPRESOLVE') && defined('CURL_IPRESOLVE_V4')) {
             curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
         }
 
-        if ($this->_method == 'GET')
-        {
-            if ($this->_request_data !== null)
-            {
-                $this->_request_url .= ((strpos($this->_request_url, '?') === false) ? '?' : '&') . $this->_request_data;
+        if ($this->_method == 'GET') {
+            if ($this->_request_data !== null && is_array($this->_request_data)) {
+                $this->_request_url .= ((strpos($this->_request_url, '?') === false) ? '?' : '&') . http_build_query($this->_request_data);
             }
             curl_setopt($ch, CURLOPT_URL, $this->_request_url);
-        }
-        else
-        {
+        } else {
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_URL, $this->_request_url);
-            if (!empty($this->_request_files))
-            {
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $this->_request_files);
-            }
-            else
-            {
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $this->_request_data);
-            }
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $this->_request_data);
         }
 
         //设置HttpHeader
-        if ($this->_headers !== null)
-        {
+        if ($this->_headers !== null) {
             curl_setopt($ch, CURLOPT_HTTPHEADER, $this->_headers);
         }
         curl_setopt($ch, CURLOPT_HEADER, true);
 
-        if ($this->_request_port !== null)
-        {
+        if ($this->_request_port !== null) {
             curl_setopt($ch, CURLOPT_PORT, $this->_request_port);
         }
 
-        if ($this->_request_cookie !== null)
-        {
+        if ($this->_request_cookie !== null) {
             curl_setopt($ch, CURLOPT_COOKIE, $this->_request_cookie);
         }
 
-        if ($this->_user_agent)
-        {
+        if ($this->_user_agent) {
             curl_setopt($ch, CURLOPT_USERAGENT, $this->_user_agent);
         }
 
         //设置证书信息
-        if ($this->_cert_file !== null)
-        {
+        if ($this->_cert_file !== null) {
             curl_setopt($ch, CURLOPT_SSLCERT, $this->_cert_file);
             curl_setopt($ch, CURLOPT_SSLCERTPASSWD, $this->_cert_passwd);
             curl_setopt($ch, CURLOPT_SSLCERTTYPE, $this->_cert_type);
         }
 
         //设置CA
-        if ($this->_ca_file !== null)
-        {
+        if ($this->_ca_file !== null) {
             // 对认证证书来源的检查，0表示阻止对证书的合法性的检查。1需要设置CURLOPT_CAINFO
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 1);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
             curl_setopt($ch, CURLOPT_CAINFO, $this->_ca_file);
-        }
-        else
-        {
+        } else {
             // 对认证证书来源的检查，0表示阻止对证书的合法性的检查。1需要设置CURLOPT_CAINFO
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
@@ -503,8 +462,7 @@ class HttpClient
 
         $this->_errno = curl_errno($ch);
         $this->_error = curl_error($ch);
-        if ($this->_errno > 0)
-        {
+        if ($this->_errno > 0) {
             curl_close($ch);
             return false;
         }
