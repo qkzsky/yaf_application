@@ -4,9 +4,14 @@ class HttpClient
 {
 
     /**
-     * 慢请求时间，默认 3 秒
+     * 连接超时时间，默认 2 秒
      */
-    const SLOW_REQUEST_TIME = 3;
+    private $_connect_timeout_ms = 2000;
+
+    /**
+     * 超时时间，默认 3 秒
+     */
+    private $_timeout_ms = 3000;
 
     /**
      * 请求的url地址
@@ -74,12 +79,6 @@ class HttpClient
     private $_error;
 
     /**
-     * 超时时间
-     * @var int 单位毫秒
-     */
-    private $_timeout = 3000;
-
-    /**
      * HTTP HEADER
      * @var array
      */
@@ -128,9 +127,9 @@ class HttpClient
      * HttpClient constructor.
      * @param string $url 请求地址
      * @param string $method 请求方式 get|post
-     * @param int $timeout 超时时间, 单位毫秒, 默认30秒
+     * @param int $timeout 超时时间, 单位毫秒, 默认3秒
      */
-    public function __construct($url = '', $method = 'GET', $timeout = 30000)
+    public function __construct($url = '', $method = 'GET', $timeout = 3000)
     {
         $this->setRequestUrl($url);
         $this->setMethod($method);
@@ -270,12 +269,23 @@ class HttpClient
 
     /**
      * 设置超时时间,单位毫秒
-     * @param $timeout
+     * @param int $timeout
      * @return bool
      */
     public function setTimeout($timeout)
     {
-        $this->_timeout = (int) $timeout;
+        $this->_timeout_ms = (int) $timeout;
+        return true;
+    }
+
+    /**
+     * 设置连接超时时间,单位毫秒
+     * @param int $timeout
+     * @return bool
+     */
+    public function setConnectTimeout($timeout)
+    {
+        $this->_connect_timeout_ms = (int) $timeout;
         return true;
     }
 
@@ -400,7 +410,8 @@ class HttpClient
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_NOSIGNAL, 1);
-        curl_setopt($ch, CURLOPT_TIMEOUT_MS, $this->_timeout);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT_MS, $this->_connect_timeout_ms);
+        curl_setopt($ch, CURLOPT_TIMEOUT_MS, $this->_timeout_ms);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         if (defined('CURLOPT_IPRESOLVE') && defined('CURL_IPRESOLVE_V4')) {
             curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
