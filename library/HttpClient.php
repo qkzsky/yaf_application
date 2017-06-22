@@ -44,6 +44,12 @@ class HttpClient
     private $_method = 'GET';
 
     /**
+     * 使用代理服务
+     * @var string
+     */
+    private $_proxy = '';
+
+    /**
      * 证书文件
      */
     private $_cert_file;
@@ -236,6 +242,15 @@ class HttpClient
     }
 
     /**
+     * 设置代理服务 127.0.0.1:8888
+     * @param $proxy
+     */
+    public function setProxy($proxy)
+    {
+        $this->_proxy = $proxy;
+    }
+
+    /**
      * 设置证书信息
      * @param string $cert_file
      * @param string $cert_passwd
@@ -416,7 +431,10 @@ class HttpClient
         if (defined('CURLOPT_IPRESOLVE') && defined('CURL_IPRESOLVE_V4')) {
             curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
         }
-
+        if (!empty($this->_proxy)) {
+            //使用代理服务
+            curl_setopt($ch, CURLOPT_PROXY, $this->_proxy);
+        }
         if ($this->_method == 'GET') {
             if ($this->_request_data !== null && is_array($this->_request_data)) {
                 $this->_request_url .= ((strpos($this->_request_url, '?') === false) ? '?' : '&') . http_build_query($this->_request_data);
