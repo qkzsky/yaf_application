@@ -18,15 +18,13 @@ class BaseCliController extends ApplicationController
         parent::init();
 
         // 非命令行访问, 跳转至404页面
-        if (!$this->getRequest()->isCli())
-        {
+        if (!$this->getRequest()->isCli()) {
             $this->redirectNotFound();
             exit;
         }
 
         // 同一进程防止重复启动
-        if (!$this->lock())
-        {
+        if (!$this->lock()) {
             exit;
         }
     }
@@ -58,8 +56,7 @@ class BaseCliController extends ApplicationController
         $this->fp = fopen($lock_file, 'a');
 
         // 独享锁
-        if (!flock($this->fp, LOCK_EX | LOCK_NB))
-        {
+        if (!flock($this->fp, LOCK_EX | LOCK_NB)) {
             return false;
         }
         return true;
@@ -70,10 +67,10 @@ class BaseCliController extends ApplicationController
      */
     public function __destruct()
     {
-        if (!empty($this->fp))
-        {
+        if (!empty($this->fp) && flock($this->fp, LOCK_EX | LOCK_NB)) {
             fclose($this->fp);
             unlink($this->getLockFile());
         }
     }
+
 }
