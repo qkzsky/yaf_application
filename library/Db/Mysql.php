@@ -243,9 +243,9 @@ class Mysql
         try {
             $this->_pdo_statement = $this->_pdo->prepare($sql);
             $this->_pdo_statement->execute($parameters);
-        } catch (\PDOException $e) {
+        } catch (\PDOException|\ErrorException $e) {
             // 服务端断开时重连一次
-            if (!empty($e->errorInfo[1]) && ($e->errorInfo[1] === 2006 || $e->errorInfo[1] === 2013)) {
+            if ($e instanceof \ErrorException || (!empty($e->errorInfo[1]) && in_array($e->errorInfo[1], [2006, 2013]))) {
                 $this->disconnect();
                 // 事务中为保证事务完整性不进行重连
                 if ($this->_is_trans) {

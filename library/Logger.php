@@ -93,7 +93,7 @@ class Logger extends \SplFileObject
             }
         }
         $buffer = "[" . self::$log_id . "]\t"
-            . self::colorString("[" . date('Y-m-d H:i:s') . "]\t", self::BLUE)
+            . self::colorString("[" . date('Y-m-d H:i:s') . "]", self::BLUE) . "\t"
             . $string . "\n";
         $this->fwrite($buffer);
     }
