@@ -35,7 +35,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
         register_shutdown_function(function() {
             $error = error_get_last();
             if ($error) {
-                $logger = \Logger::getLogger("fatal_error")->error(json_encode($error));
+                \Logger::getLogger("fatal_error")->error(json_encode($error));
             }
         });
     }
