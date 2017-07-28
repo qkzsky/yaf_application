@@ -25,16 +25,19 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
     {
         error_reporting(-1);
         //报错是否开启
-        if (Yaf_Application::app()->getConfig()->application->displayErrors)
-        {
+        if (Yaf_Application::app()->getConfig()->application->displayErrors) {
             ini_set('display_errors', 'On');
-        }
-        else
-        {
+        } else {
             ini_set('display_errors', 'Off');
         }
 
         $dispatcher->setErrorHandler([__CLASS__, 'error_handler']);
+        register_shutdown_function(function() {
+            $error = error_get_last();
+            if ($error) {
+                $logger = \Logger::getLogger("fatal_error")->error(json_encode($error));
+            }
+        });
     }
 
     /**
@@ -85,8 +88,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
     private function _initPlugin(Yaf_Dispatcher $dispatcher)
     {
         $dispatcher->registerPlugin(new LogPlugin());
-        if (Yaf_Application::app()->getConfig()->application->xhprof && extension_loaded('xhprof'))
-        {
+        if (Yaf_Application::app()->getConfig()->application->xhprof && extension_loaded('xhprof')) {
             $dispatcher->registerPlugin(new XhprofPlugin());
         }
         // $dispatcher->registerPlugin(new SamplePlugin());
@@ -127,10 +129,8 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
         $app = $dispatcher->getApplication();
 
         $modules = $app->getModules();
-        foreach ($modules as $module)
-        {
-            if ($module === 'Index')
-            {
+        foreach ($modules as $module) {
+            if ($module === 'Index') {
                 continue;
             }
 
@@ -144,34 +144,27 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
     public function _initCli(Yaf_Dispatcher $dispatcher)
     {
         $request = $dispatcher->getRequest();
-        if ($request->isCli())
-        {
+        if ($request->isCli()) {
             global $argc, $argv;
-            if ($argc > 1)
-            {
+            if ($argc > 1) {
                 $uri = $argv [1];
-                if (preg_match('/^[^?]*%/i', $uri))
-                {
+                if (preg_match('/^[^?]*%/i', $uri)) {
                     list ($module, $uri) = explode('%', $uri, 2);
-                    if (isset($module))
-                    {
+                    if (isset($module)) {
                         $module = strtolower($module);
-                        if (in_array(ucfirst($module), Yaf_Application::app()->getModules()))
-                        {
+                        if (in_array(ucfirst($module), Yaf_Application::app()->getModules())) {
                             $request->setModuleName($module);
                         }
                     }
                 }
 
                 $args = [];
-                if (false !== strpos($uri, '?'))
-                {
+                if (false !== strpos($uri, '?')) {
                     list ($uri, $args_str) = explode('?', $uri, 2);
                     parse_str($args_str, $args);
                 }
                 $request->setRequestUri($uri);
-                foreach ($args as $k => $v)
-                {
+                foreach ($args as $k => $v) {
                     $request->setParam($k, $v);
                 }
             }
@@ -205,8 +198,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
         // by the @ error-control operator.
         //
 
-        if (error_reporting() & $errno)
-        {
+        if (error_reporting() & $errno) {
             throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
         }
     }
