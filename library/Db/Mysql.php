@@ -10,6 +10,7 @@
  * @encoding UTF-8
  * @version $Id: mysql.php, v 1.0 2015-3-14 0:08:43
  */
+
 /**
  * Description of Db\mysql
  *
@@ -336,9 +337,10 @@ class Mysql
 
     /**
      * 返回指定SQL结果的第一个字段的列
-     * @param string $sql
+     * @param $sql
      * @param array $parameters
      * @return array
+     * @throws \Exception
      */
     public function fetchCol($sql, array $parameters = array())
     {
@@ -412,8 +414,9 @@ class Mysql
 
     /**
      * 新增数据
-     * @param string $table
+     * @param $table
      * @param array $data
+     * @throws \Exception
      */
     public function insert($table, array $data)
     {
@@ -433,6 +436,7 @@ class Mysql
      * 替换数据
      * @param string $table
      * @param array $data
+     * @throws \Exception
      */
     public function replace($table, array $data)
     {
@@ -452,6 +456,7 @@ class Mysql
      * 存在则不替换
      * @param string $table
      * @param array $data
+     * @throws \Exception
      */
     public function insertIgnore($table, array $data)
     {
@@ -471,6 +476,7 @@ class Mysql
      * 忽略插入别名方法
      * @param string $table
      * @param array $data
+     * @throws \Exception
      */
     public function ignoreInsert($table, array $data)
     {
@@ -482,6 +488,7 @@ class Mysql
      * @param string $table
      * @param array $in_data 插入的数据
      * @param array $up_data 更新的数据
+     * @throws \Exception
      */
     public function insertUpdate($table, array $in_data, array $up_data)
     {
@@ -506,11 +513,12 @@ class Mysql
 
     /**
      * 批量插入
-     * @param string $table
+     * @param $table
      * @param array $data 二维数组
      * @param array $fields 指定需要插入的值, 为空则使用$data中所有key
      * @param string $type insert|ignore|replace
      * @throws \ErrorException
+     * @throws \Exception
      */
     public function insertMulti($table, array $data, array $fields = array(), $type = 'insert')
     {
@@ -557,11 +565,12 @@ class Mysql
 
     /**
      * 批量插入别名方法
-     *
-     * @param string $table
+     * @param $table
      * @param array $data
      * @param array $fields
      * @param string $type
+     * @throws \ErrorException
+     * @throws \Exception
      */
     public function multiInsert($table, array $data, array $fields = array(), $type = 'insert')
     {
@@ -570,11 +579,12 @@ class Mysql
 
     /**
      * 存在则更新(批量)
-     * @param string $table
+     * @param $table
      * @param array $in_data 插入的数据(二维数组)
      * @param array $up_data 更新的数据(一维数组)
      * @param array $fields 指定需要插入的值, 为空则使用$in_data第一个中所有key
      * @throws \ErrorException
+     * @throws \Exception
      */
     public function insertUpdateMulti($table, array $in_data, array $up_data, array $fields = array())
     {
@@ -617,6 +627,8 @@ class Mysql
      * @param array $in_data 插入的数据(二维数组)
      * @param array $up_data 更新的数据(一维数组)
      * @param array $fields 指定需要插入的值, 为空则使用$in_data第一个中所有key
+     * @throws \ErrorException
+     * @throws \Exception
      */
     public function multiInsertUpdate($table, array $in_data, array $up_data, array $fields = array())
     {
@@ -625,10 +637,11 @@ class Mysql
 
     /**
      * 更新
-     * @param string $table
+     * @param $table
      * @param array $data
-     * @param string $condition
+     * @param $condition
      * @param array $cond_parameters
+     * @throws \Exception
      */
     public function update($table, array $data, $condition, array $cond_parameters = array())
     {
@@ -701,9 +714,10 @@ class Mysql
 
     /**
      * 删除
-     * @param string $table
-     * @param string $condition
+     * @param $table
+     * @param $condition
      * @param array $cond_parameters
+     * @throws \Exception
      */
     public function delete($table, $condition, array $cond_parameters = array())
     {
@@ -744,7 +758,8 @@ class Mysql
 
     /**
      * 开始事务
-     * @return boolean
+     * @return bool
+     * @throws \Exception
      */
     public function begin()
     {
