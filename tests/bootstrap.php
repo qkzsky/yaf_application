@@ -13,8 +13,6 @@
 
 // 项目根目录
 define("APP_PATH", realpath(dirname(__FILE__) . "/../"));
-// models所在目录
-define("MODELS_PATH", APP_PATH . "/application/models/");
 
 // var_dump(class_exists("\PHPUnit\DbUnit\TestCase"));
 // var_dump(class_exists("\PHPUnit\Framework\TestCase"));
