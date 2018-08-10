@@ -558,6 +558,10 @@ function long2ipfix($ip_32)
  */
 function ip2longfix($ip)
 {
+    if ($ip === "" || is_null($ip)) {
+        return false;
+    }
+
     $ip_arr = explode('.', $ip);
     $iplong = ($ip_arr[0] << 24) +
         ($ip_arr[1] << 16) +

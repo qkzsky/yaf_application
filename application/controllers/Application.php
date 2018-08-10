@@ -39,13 +39,10 @@ class ApplicationController extends Yaf_Controller_Abstract
     public function init()
     {
         //Set session.
-        if (!$this->getRequest()->isCli())
-        {
+        if (!$this->getRequest()->isCli()) {
             $session_conf = \Yaf_Application::app()->getConfig()->session;
-            if (!empty($session_conf->save_handler) && !empty($session_conf->save_path))
-            {
-                if (!session_id())
-                {
+            if (!empty($session_conf->save_handler) && !empty($session_conf->save_path)) {
+                if (!session_id()) {
                     ini_set("session.save_handler", $session_conf->save_handler);
                     ini_set("session.save_path", $session_conf->save_path);
                 }
@@ -73,6 +70,13 @@ class ApplicationController extends Yaf_Controller_Abstract
     {
         $this->$name = $value;
         $this->getView()->assignRef($name, $this->$name);
+    }
+
+    public function display($tpl, array $parameters = NULL)
+    {
+        $body = parent::render($tpl, $parameters);
+        $this->getResponse()->setBody($body);
+        // parent::display($tpl, $parameters);
     }
 
     /**

@@ -54,6 +54,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
     private function _initTimezone()
     {
         ini_set("date.timezone", Yaf_Application::app()->getConfig()->application->timezone);
+
     }
 
     private function _initIncludePath()
@@ -93,15 +94,15 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
         }
         // $dispatcher->registerPlugin(new SamplePlugin());
 
-//        if ($this->config->application->protect_from_csrf && !$dispatcher->getRequest()->isCli())
-//        {
-//            $dispatcher->registerPlugin(new AuthTokenPlugin());
-//        }
+        //        if ($this->config->application->protect_from_csrf && !$dispatcher->getRequest()->isCli())
+        //        {
+        //            $dispatcher->registerPlugin(new AuthTokenPlugin());
+        //        }
     }
 
     private function _initLoader(Yaf_Dispatcher $dispatcher)
     {
-
+        spl_autoload_register(["Loader", "loaderService"], true, true);
     }
 
     /**

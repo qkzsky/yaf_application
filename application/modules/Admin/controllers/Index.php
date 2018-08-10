@@ -20,16 +20,16 @@
 class IndexController extends ApplicationController
 {
 
-    protected $layout = 'admin';
+    // protected $layout = 'admin';
 
     public function init()
     {
         parent::init();
 
-        $this->getView()->setLayoutPath(
-                $this->getConfig()->application->directory
-                . "/modules/" . $this->getModuleName() . "/views/layouts"
-        );
+        // $this->getView()->setLayoutPath(
+        //     Yaf_Application::app()->getConfig()->application->directory
+        //         . "/modules/" . $this->getModuleName() . "/views/layouts"
+        // );
     }
 
     public function indexAction()
