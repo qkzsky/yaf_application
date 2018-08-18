@@ -681,10 +681,10 @@ function timeSince(string $time, string $unit = null, $get_as_float = false)
         "ns" => ["value" => $_nanosecond, "float_number" => 0, "unit" => "ns"],
     ];
     if ($unit || $get_as_float) {
+        $unit = $unit ?? "s";
         if (!isset($_units[$unit])) {
             throw new ErrorException("invalid unit:{$unit}");
         }
-        $unit = $unit ?? "s";
     }
 
     $result = "";
