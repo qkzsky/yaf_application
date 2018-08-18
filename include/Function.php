@@ -652,14 +652,13 @@ function fast_rpc_call($server_addr, $method, array $parameters, $charset = 'utf
  */
 function timeSince(string $time, string $unit = null, $get_as_float = false)
 {
-    $_tmp     = explode(" ", microtime());
-    $end_time = $_tmp[1] + $_tmp[0];
+    $end_time = microtime(true);
 
     if (strpos($time, " ") !== false) {
         $_tmp       = explode(" ", $time);
         $start_time = $_tmp[1] + $_tmp[0];
     } else {
-        $start_time = (float) $time;
+        $start_time = $time;
     }
 
     $cost_time = $end_time - $start_time;
@@ -667,72 +666,48 @@ function timeSince(string $time, string $unit = null, $get_as_float = false)
     $_second      = 1;
     $_minute      = $_second * 60;
     $_hour        = $_minute * 60;
+    $_day         = $_hour * 24;
     $_millisecond = $_second / 1000;
     $_microsecond = $_millisecond / 1000;
     $_nanosecond  = $_microsecond / 1000;
+
+    $_units = [
+        "d"  => ["value" => $_day, "float_number" => 0, "unit" => "d"],
+        "h"  => ["value" => $_hour, "float_number" => 0, "unit" => "h"],
+        "m"  => ["value" => $_minute, "float_number" => 0, "unit" => "m"],
+        "s"  => ["value" => $_second, "float_number" => 9, "unit" => "s"],
+        "ms" => ["value" => $_millisecond, "float_number" => 6, "unit" => "ms"],
+        "us" => ["value" => $_microsecond, "float_number" => 3, "unit" => "µs"],
+        "ns" => ["value" => $_nanosecond, "float_number" => 0, "unit" => "ns"],
+    ];
     if ($unit || $get_as_float) {
-        switch ($unit) {
-            case "h":
-                $_value = floor($cost_time / $_hour);
-                break;
-            case "m":
-                $_value = floor($cost_time / $_minute);
-                break;
-            case "s":
-                $_value = round($cost_time / $_second, 9);
-                break;
-            case "ms":
-                $_value = round($cost_time / $_millisecond, 6);
-                break;
-            case "us":
-            case "µs":
-                $_value = round($cost_time / $_microsecond, 3);
-                $unit   = "µs";
-                break;
-            case "ns":
-                $_value = round($cost_time / $_nanosecond);
-                break;
-            default:
-                $unit = "s";
-                if (!is_null($unit)) {
-                    throw new ErrorException("invalid unit:{$unit}");
-                }
-                $_value = round($cost_time / $_millisecond, 9);
-                break;
+        if (!isset($_units[$unit])) {
+            throw new ErrorException("invalid unit:{$unit}");
         }
-        return $get_as_float ? floatval($_value) : ($_value . $unit);
+        $unit = $unit ?? "s";
     }
 
     $result = "";
-    if ($cost_time >= $_hour) {
-        $_h        = floor($cost_time / $_hour);
-        $cost_time -= ($_h * $_hour);
-        $result    .= "{$_h}h";
-    }
-    if ($cost_time >= $_minute) {
-        $_m        = floor($cost_time / $_minute);
-        $cost_time -= ($_m * $_minute);
-        $result    .= "{$_m}m";
-    }
-    if ($cost_time >= $_second) {
-        if ($result !== "") {
-            $_s = floor($cost_time / $_second);
-        } else {
-            $_s = round($cost_time / $_second, 9);
+    foreach ($_units as $_key => $item) {
+        if ((!is_null($unit) || $item["value"] < $_second) && $result !== "") {
+            break;
         }
-        $result .= "{$_s}s";
-    }
-    if ($result === "" && $cost_time >= $_millisecond) {
-        $_ms    = round($cost_time / $_millisecond, 6);
-        $result .= "{$_ms}ms";
-    }
-    if ($result === "" && $cost_time >= $_microsecond) {
-        $_us    = round($cost_time / $_microsecond, 3);
-        $result .= "{$_us}µs";
-    }
-    if ($result === "" && $cost_time >= $_nanosecond) {
-        $_ns    = round($cost_time / $_nanosecond);
-        $result .= "{$_ns}ns";
+        if (!is_null($unit) && $_key !== $unit) {
+            continue;
+        }
+
+        if ($cost_time >= $item["value"] || $item["unit"] === $unit) {
+            if ($item["value"] <= $_second) {
+                $_value = round($cost_time / $item["value"], $item["float_number"]);
+            } else {
+                $_value = floor($cost_time / $item["value"]);
+            }
+            $cost_time -= ($_value * $item["value"]);
+
+            $result .= $get_as_float ? $_value : ($_value . $item["unit"]);
+        } elseif ($item["value"] >= $_second && $result !== "") {
+            $result .= "0" . $item["unit"];
+        }
     }
 
     return $result;
