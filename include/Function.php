@@ -11,14 +11,12 @@ function dump()
     $args = func_get_args();
 
     ob_start();
-    foreach ($args as $val)
-    {
+    foreach ($args as $val) {
         var_dump($val);
     }
     $output = ob_get_clean();
 
-    if (!extension_loaded('xdebug') && !IS_CLI)
-    {
+    if (!extension_loaded('xdebug') && !IS_CLI) {
         $output = preg_replace('/\]\=\>\n(\s+)/m', '] => ', $output);
         $output = '<pre>' . htmlspecialchars($output, ENT_QUOTES) . '</pre>';
     }
@@ -40,8 +38,7 @@ function require_cache($filename)
         return false;
 
     $realpath = realpath($filename);
-    if (!isset($_importFiles[$realpath]))
-    {
+    if (!isset($_importFiles[$realpath])) {
         require $filename;
         $_importFiles[$realpath] = true;
     }
@@ -55,12 +52,10 @@ function require_cache($filename)
  */
 function file_exists_case($filename)
 {
-    if (!is_file($filename))
-    {
+    if (!is_file($filename)) {
         return false;
     }
-    if (basename(realpath($filename)) != basename($filename))
-    {
+    if (basename(realpath($filename)) != basename($filename)) {
         return false;
     }
 
@@ -74,16 +69,11 @@ function file_exists_case($filename)
  */
 function to_guid_string($mix)
 {
-    if (is_object($mix) && function_exists('spl_object_hash'))
-    {
+    if (is_object($mix) && function_exists('spl_object_hash')) {
         return spl_object_hash($mix);
-    }
-    elseif (is_resource($mix))
-    {
+    } elseif (is_resource($mix)) {
         $mix = get_resource_type($mix) . strval($mix);
-    }
-    else
-    {
+    } else {
         $mix = serialize($mix);
     }
     return md5($mix);
@@ -114,8 +104,7 @@ function mk_dirs(array $dirs, $mode = 0777)
 {
     if (!is_array($dirs))
         return false;
-    foreach ($dirs as $dir)
-    {
+    foreach ($dirs as $dir) {
         if (!is_dir($dir))
             mk_dir($dir, $mode);
     }
@@ -130,30 +119,21 @@ function mk_dirs(array $dirs, $mode = 0777)
  */
 function auto_charset($fContents, $from = 'gbk', $to = 'utf-8')
 {
-    if (strtoupper($from) === strtoupper($to) || empty($fContents) || (is_scalar($fContents) && !is_string($fContents)))
-    {
+    if (strtoupper($from) === strtoupper($to) || empty($fContents) || (is_scalar($fContents) && !is_string($fContents))) {
         //如果编码相同或者非字符串标量则不转换
         return $fContents;
     }
-    if (is_string($fContents))
-    {
-        if (function_exists('mb_convert_encoding'))
-        {
+    if (is_string($fContents)) {
+        if (function_exists('mb_convert_encoding')) {
             return mb_convert_encoding($fContents, $to, $from);
-        }
-        elseif (function_exists('iconv'))
-        {
+        } elseif (function_exists('iconv')) {
             return iconv($from, $to, $fContents);
         }
-    }
-    elseif (is_array($fContents))
-    {
-        foreach ($fContents as $key => $val)
-        {
+    } elseif (is_array($fContents)) {
+        foreach ($fContents as $key => $val) {
             $_key             = auto_charset($key, $from, $to);
             $fContents[$_key] = auto_charset($val, $from, $to);
-            if ($key != $_key)
-            {
+            if ($key != $_key) {
                 unset($fContents[$key]);
             }
         }
@@ -175,12 +155,9 @@ function auto_charset($fContents, $from = 'gbk', $to = 'utf-8')
  */
 function msubstr($str, $start = 0, $length = null, $charset = 'utf-8', $suffix = true)
 {
-    if (function_exists('mb_substr'))
-    {
+    if (function_exists('mb_substr')) {
         return mb_substr($str, $start, $length, $charset);
-    }
-    elseif (function_exists('iconv_substr'))
-    {
+    } elseif (function_exists('iconv_substr')) {
         return iconv_substr($str, $start, $length, $charset);
     }
     $re['utf-8']  = "/[\x01-\x7f]|[\xc2-\xdf][\x80-\xbf]|[\xe0-\xef][\x80-\xbf]{2}|[\xf0-\xff][\x80-\xbf]{3}/";
@@ -205,8 +182,7 @@ function xml_encode($data, $encoding = 'utf-8', $root = '')
 {
     $xml = '<?xml version="1.0" encoding="' . $encoding . '"?>';
     $xml .= data_to_xml($data);
-    if (!empty($root))
-    {
+    if (!empty($root)) {
         $xml = "<{$root}>{$xml}</{$root}>";
     }
 
@@ -220,13 +196,11 @@ function xml_encode($data, $encoding = 'utf-8', $root = '')
  */
 function data_to_xml($data)
 {
-    if (is_object($data))
-    {
+    if (is_object($data)) {
         $data = get_object_vars($data);
     }
     $xml = '';
-    foreach ($data as $key => $val)
-    {
+    foreach ($data as $key => $val) {
         is_numeric($key) && $key = 'item id="' . $key . '"';
         $xml .= '<' . $key . '>';
         $xml .= (is_array($val) || is_object($val)) ? data_to_xml($val) : $val;
@@ -247,11 +221,9 @@ function array_msort($array, $cols)
 {
     $col_arr = array();
     $params  = array();
-    foreach ($cols as $col => $order)
-    {
+    foreach ($cols as $col => $order) {
         $col_arr[$col] = array();
-        foreach ($array as $k => $row)
-        {
+        foreach ($array as $k => $row) {
             $col_arr[$col]['_' . $k] = $row[$col];
         }
         $params[] = &$col_arr[$col];
@@ -260,10 +232,8 @@ function array_msort($array, $cols)
     call_user_func_array('array_multisort', $params);
 
     $ret = array();
-    foreach ($col_arr as $col => $sort_arr)
-    {
-        foreach ($sort_arr as $k => $v)
-        {
+    foreach ($col_arr as $col => $sort_arr) {
+        foreach ($sort_arr as $k => $v) {
             $k       = substr($k, 1);
             $ret[$k] = $array[$k];
         }
@@ -284,24 +254,17 @@ function redirect($url, $time = 0, $msg = '')
     $url = str_replace(array("\n", "\r"), '', $url);
     if (empty($msg))
         $msg = '系统将在' . $time . '秒之后自动跳转到' . $url . '！';
-    if (!headers_sent())
-    {
+    if (!headers_sent()) {
         // redirect
-        if (0 === $time)
-        {
+        if (0 === $time) {
             header('Location: ' . $url);
-        }
-        else
-        {
+        } else {
             header('refresh:' . $time . ';url=' . $url);
             echo $msg;
         }
-    }
-    else
-    {
+    } else {
         $str = '<meta http-equiv="Refresh" content="' . $time . ';URL=' . $url . '">';
-        if ($time != 0)
-        {
+        if ($time != 0) {
             $str .= $msg;
         }
         echo $str;
@@ -365,8 +328,7 @@ function send_http_status($code)
         505 => 'HTTP Version Not Supported',
         509 => 'Bandwidth Limit Exceeded'
     );
-    if (isset($_status[$code]))
-    {
+    if (isset($_status[$code])) {
         $protocol = (isset($_SERVER['SERVER_PROTOCOL']) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.0');
         header($protocol . ' ' . $code . ' ' . $_status[$code]);
         // 确保FastCGI模式下正常
@@ -385,8 +347,7 @@ function send_http_status($code)
 function rand_string($len = 6, $type = null, $addChars = null)
 {
     $str = '';
-    switch ($type)
-    {
+    switch ($type) {
         case 1:
             $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
             break;
@@ -404,19 +365,15 @@ function rand_string($len = 6, $type = null, $addChars = null)
             $chars = 'ABCDEFGHIJKMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
             break;
     }
-    $chars .= $addChars;
+    $chars     .= $addChars;
     $chars_len = mb_strlen($chars, 'utf-8');
     //位数过长重复字符串一定次数
-    if ($len > $chars_len && $type != 4)
-    {
+    if ($len > $chars_len && $type != 4) {
         $chars = str_shuffle(str_repeat($chars, ceil($len / $chars_len)));
         $str   = substr($chars, 0, $len);
-    }
-    else
-    {
+    } else {
         // 中文随机字
-        for ($i = 0; $i < $len; $i++)
-        {
+        for ($i = 0; $i < $len; $i++) {
             $str .= msubstr($chars, mt_rand(0, $chars_len - 1), 1);
         }
     }
@@ -442,8 +399,7 @@ function is_utf8($string)
  */
 function highlight_code($str, $show = false)
 {
-    if (file_exists($str))
-    {
+    if (file_exists($str)) {
         $str = file_get_contents($str);
     }
     $str = stripslashes(trim($str));
@@ -467,8 +423,7 @@ function highlight_code($str, $show = false)
 
     // Prior to PHP 5, the highlight function used icky font tags
     // so we'll replace them with span tags.
-    if (abs(phpversion()) < 5)
-    {
+    if (abs(phpversion()) < 5) {
         $str = str_replace(array('<font ', '</font>'), array('<span ', '</span>'), $str);
         $str = preg_replace('#color="(.*?)"#', 'style="color: \\1"', $str);
     }
@@ -482,18 +437,14 @@ function highlight_code($str, $show = false)
     $str    = str_replace(array('phptagopen', 'phptagclose', 'backslashtmp'), array('&lt;?php', '?&gt;', '\\'), $str);
     $line   = explode("<br />", rtrim(ltrim($str, '<code>'), '</code>'));
     $result = '<div class="code"><ol>';
-    foreach ($line as $key => $val)
-    {
+    foreach ($line as $key => $val) {
         $result .= '<li>' . $val . '</li>';
     }
     $result .= '</ol></div>';
     $result = str_replace("\n", '', $result);
-    if ($show !== false)
-    {
+    if ($show !== false) {
         echo($result);
-    }
-    else
-    {
+    } else {
         return $result;
     }
 }
@@ -506,21 +457,15 @@ function highlight_code($str, $show = false)
 function get_client_ip()
 {
     static $ip = null;
-    if ($ip !== null)
-    {
+    if ($ip !== null) {
         return $ip;
     }
-    if (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))
-    {
+    if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
         $arr = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
         $ip  = trim($arr[0]);
-    }
-    elseif (!empty($_SERVER['HTTP_CLIENT_IP']))
-    {
+    } elseif (!empty($_SERVER['HTTP_CLIENT_IP'])) {
         $ip = $_SERVER['HTTP_CLIENT_IP'];
-    }
-    elseif (!empty($_SERVER['REMOTE_ADDR']))
-    {
+    } elseif (!empty($_SERVER['REMOTE_ADDR'])) {
         $ip = $_SERVER['REMOTE_ADDR'];
     }
     // IP地址合法验证
@@ -533,8 +478,7 @@ function long2ipfix($ip_32)
     $ip = long2ip($ip_32);
     //先判断是big-endian还是little-endian
     $foo = 0x3456789a;
-    switch (pack('L', $foo))
-    {
+    switch (pack('L', $foo)) {
         case pack('V', $foo):
             //little-endian
             $tmp = explode(".", $ip);
@@ -578,8 +522,7 @@ function ip2longfix($ip)
  */
 function raw_input($notice, $length = 255)
 {
-    if ((is_string($notice) && $notice === '') || is_bool($notice))
-    {
+    if ((is_string($notice) && $notice === '') || is_bool($notice)) {
         return false;
     }
     print($notice . " ");
@@ -598,15 +541,11 @@ function raw_input($notice, $length = 255)
 function arguments(array $argv)
 {
     $_ARG = array();
-    foreach ($argv as $arg)
-    {
+    foreach ($argv as $arg) {
         $reg = array();
-        if (preg_match('/--([^=]+)=(.*)/', $arg, $reg))
-        {
+        if (preg_match('/--([^=]+)=(.*)/', $arg, $reg)) {
             $_ARG[$reg[1]] = $reg[2];
-        }
-        elseif (preg_match('/^-([a-zA-Z0-9])/', $arg, $reg))
-        {
+        } elseif (preg_match('/^-([a-zA-Z0-9])/', $arg, $reg)) {
             $_ARG[$reg[1]] = 'true';
         }
     }
@@ -621,8 +560,7 @@ function byte_format($size, $dec = 2)
 {
     $a   = array('B', 'KB', 'MB', 'GB', 'TB', 'PB');
     $pos = 0;
-    while ($size >= 1024)
-    {
+    while ($size >= 1024) {
         $size /= 1024;
         $pos++;
     }
@@ -696,12 +634,106 @@ function fast_rpc_call($server_addr, $method, array $parameters, $charset = 'utf
     $_response = file_get_contents($server_addr, null, $context);
 
     $response = xmlrpc_decode($_response);
-    if (is_array($response))
-    {
-        if (xmlrpc_is_fault($response))
-        {
+    if (is_array($response)) {
+        if (xmlrpc_is_fault($response)) {
             return -9999;
         }
     }
     return $response;
+}
+
+/**
+ * 返回耗时
+ * @param string $time 开始时间
+ * @param string|null $unit 返回的时间单位，为NULL自动推导
+ * @param bool $get_as_float 是否返回一个float
+ * @return string|float
+ * @throws ErrorException
+ */
+function timeSince(string $time, string $unit = null, $get_as_float = false)
+{
+    $_tmp     = explode(" ", microtime());
+    $end_time = $_tmp[1] + $_tmp[0];
+
+    if (strpos($time, " ") !== false) {
+        $_tmp       = explode(" ", $time);
+        $start_time = $_tmp[1] + $_tmp[0];
+    } else {
+        $start_time = (float) $time;
+    }
+
+    $cost_time = $end_time - $start_time;
+
+    $_second      = 1;
+    $_minute      = $_second * 60;
+    $_hour        = $_minute * 60;
+    $_millisecond = $_second / 1000;
+    $_microsecond = $_millisecond / 1000;
+    $_nanosecond  = $_microsecond / 1000;
+    if ($unit || $get_as_float) {
+        switch ($unit) {
+            case "h":
+                $_value = floor($cost_time / $_hour);
+                break;
+            case "m":
+                $_value = floor($cost_time / $_minute);
+                break;
+            case "s":
+                $_value = round($cost_time / $_second, 9);
+                break;
+            case "ms":
+                $_value = round($cost_time / $_millisecond, 6);
+                break;
+            case "us":
+            case "µs":
+                $_value = round($cost_time / $_microsecond, 3);
+                $unit   = "µs";
+                break;
+            case "ns":
+                $_value = round($cost_time / $_nanosecond);
+                break;
+            default:
+                $unit = "s";
+                if (!is_null($unit)) {
+                    throw new ErrorException("invalid unit:{$unit}");
+                }
+                $_value = round($cost_time / $_millisecond, 9);
+                break;
+        }
+        return $get_as_float ? floatval($_value) : ($_value . $unit);
+    }
+
+    $result = "";
+    if ($cost_time >= $_hour) {
+        $_h        = floor($cost_time / $_hour);
+        $cost_time -= ($_h * $_hour);
+        $result    .= "{$_h}h";
+    }
+    if ($cost_time >= $_minute) {
+        $_m        = floor($cost_time / $_minute);
+        $cost_time -= ($_m * $_minute);
+        $result    .= "{$_m}m";
+    }
+    if ($cost_time >= $_second) {
+        if ($result !== "") {
+            $_s = floor($cost_time / $_second);
+        } else {
+            $_s = round($cost_time / $_second, 9);
+        }
+        $result .= "{$_s}s";
+    }
+    if ($result === "" && $cost_time >= $_millisecond) {
+        $_ms    = round($cost_time / $_millisecond, 6);
+        $result .= "{$_ms}ms";
+    }
+    if ($result === "" && $cost_time >= $_microsecond) {
+        $_us    = round($cost_time / $_microsecond, 3);
+        $result .= "{$_us}µs";
+    }
+    if ($result === "" && $cost_time >= $_nanosecond) {
+        $_ns    = round($cost_time / $_nanosecond);
+        $result .= "{$_ns}ns";
+    }
+
+    return $result;
 }
