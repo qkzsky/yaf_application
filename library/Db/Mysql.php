@@ -290,7 +290,7 @@ class Mysql
     }
 
     /**
-     * 格式化SQL语句与传值，为function则直接使用返回的字符串操作
+     * 格式化SQL语句与传值，为DbString对象则直接使用返回的字符串操作
      * @param string $sql
      * @param array $parameters
      */
@@ -300,6 +300,7 @@ class Mysql
             if (is_object($v) && $v instanceof DbString) {
                 $_k  = ($k[0] === ":") ? $k : ":{$k}";
                 $sql = preg_replace("/({$_k}([^\w]|$))/", (string) $v . "$2", $sql);
+                unset($parameters[$k]);
             }
 
             if (is_array($v)) {
