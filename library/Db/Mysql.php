@@ -300,6 +300,17 @@ class Mysql
             if (is_object($v) && $v instanceof DbString) {
                 $_k  = ($k[0] === ":") ? $k : ":{$k}";
                 $sql = preg_replace("/({$_k}([^\w]|$))/", (string) $v . "$2", $sql);
+            }
+
+            if (is_array($v)) {
+                $_k    = ($k[0] === ":") ? $k : ":{$k}";
+                $_keys = [];
+                foreach ($v as $_i => $_v) {
+                    $_field_key              = "{$_k}_{$_i}";
+                    $_keys[]                 = $_field_key;
+                    $parameters[$_field_key] = $_v;
+                };
+                $sql = preg_replace("/({$_k}([^\w]|$))/", implode(",", $_keys) . "$2", $sql);
                 unset($parameters[$k]);
             }
         }
