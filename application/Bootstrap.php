@@ -88,7 +88,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
 
     private function _initPlugin(Yaf_Dispatcher $dispatcher)
     {
-        $dispatcher->registerPlugin(new LogPlugin());
+        // $dispatcher->registerPlugin(new LogPlugin());
         if (Yaf_Application::app()->getConfig()->application->xhprof && extension_loaded('xhprof')) {
             $dispatcher->registerPlugin(new XhprofPlugin());
         }

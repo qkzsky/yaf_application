@@ -14,25 +14,40 @@ class Logger extends \SplFileObject
     const RESET_SEQ = "\033[0m";
     const BOLD_SEQ  = "\033[1m";
 
-    const EMERGENCY = 'emergency';
-    const ALERT     = 'alert';
-    const CRITICAL  = 'critical';
-    const ERROR     = 'error';
-    const WARNING   = 'warning';
-    const NOTICE    = 'notice';
-    const INFO      = 'info';
-    const DEBUG     = 'debug';
+    const DEBUG     = 0;
+    const INFO      = 1;
+    const NOTICE    = 2;
+    const WARNING   = 3;
+    const ERROR     = 4;
+    const CRITICAL  = 5;
+    const ALERT     = 6;
+    const EMERGENCY = 7;
+
+    const LEVEL_STRING = [
+        self::DEBUG     => 'DEBUG',
+        self::INFO      => 'INFO',
+        self::NOTICE    => 'NOTICE',
+        self::WARNING   => 'WARNING',
+        self::ERROR     => 'ERROR',
+        self::CRITICAL  => 'CRITICAL',
+        self::ALERT     => 'ALERT',
+        self::EMERGENCY => 'EMERGENCY',
+    ];
+
+    private static $start_time;
+    private static $log_level = 0;
+    private static $log_color = false;
+    private static $service_name;
+    private static $host_name;
 
     private static $log_id;
-    private static $start_time;
     private static $memory;
     private static $logger_instance = array();
 
     public function __construct($filename = null, $open_mode = "a")
     {
         parent::__construct($filename, $open_mode);
-        if (!self::$log_id)
-        {
+        if (!self::$log_id) {
             self::$log_id = uniqid();
         }
     }
@@ -46,12 +61,17 @@ class Logger extends \SplFileObject
     public static function getLogger($env = null, $open_mode = "a")
     {
         $env = $env ?: YAF_ENVIRON;
-        if (!isset(static::$logger_instance[$env]) || !(static::$logger_instance[$env] instanceof self))
-        {
-            $log_path = \Yaf_Application::app()->getConfig()->application->log;
-            $filename = $log_path . "/" . $env . '.log';
+        if (!isset(static::$logger_instance[$env]) || !(static::$logger_instance[$env] instanceof self)) {
+            $log_config = \Yaf_Application::app()->getConfig()->log;
+            $log_path   = $log_config->path ?? ".";
+            $filename   = $log_path . "/" . $env . '.log';
             mk_dir(dirname($filename));
             static::$logger_instance[$env] = new static($filename, $open_mode);
+
+            static::$log_level    = $log_config->level ?? 0;
+            static::$log_color    = $log_config->color ?? false;
+            static::$service_name = $log_config->service_name ?? null;
+            static::$host_name    = $_SERVER['SERVER_ADDR'] ?? $_SERVER['HOSTNAME'] ?? null;
         }
         return static::$logger_instance[$env];
     }
@@ -80,22 +100,63 @@ class Logger extends \SplFileObject
         $this->write($string);
     }
 
-    private function write($string)
+    private function write(string $log, int $level = null)
     {
+        $log_level = "";
+        if (!is_null($level) && isset(self::LEVEL_STRING[$level])) {
+            if ($level < self::$log_level) {
+                return;
+            }
+            $level_string = self::LEVEL_STRING[$level];
+            switch ($level) {
+                case self::DEBUG:
+                case self::INFO:
+                case self::NOTICE:
+                    $level_color = self::CYAN;
+                    break;
+                case self::WARNING:
+                    $level_color = self::YELLOW;
+                    break;
+                case self::ERROR:
+                    $level_color = self::RED;
+                    break;
+                default:
+                    $level_color = self::PURPLE;
+                    break;
+            }
+
+            $log_level = self::colorString($level_string, $level_color);
+        }
+
         $traces = debug_backtrace(false);
         array_shift($traces);
-        foreach ($traces as $row)
-        {
-            if (isset($row['file']))
-            {
-                $string .= "\t[{$row['file']}:{$row['line']}]";
+        foreach ($traces as $row) {
+            if (isset($row['file'])) {
+                $_trace_file = $row['file'];
+                $_trace_line = $row['line'];
                 break;
             }
         }
-        $buffer = "[" . self::$log_id . "]\t"
-            . self::colorString("[" . date('Y-m-d H:i:s') . "]", self::BLUE) . "\t"
-            . $string . "\n";
-        $this->fwrite($buffer);
+
+        $buffer_fields = [
+            date('Y-m-d H:i:s'),
+            self::$service_name,
+            self::$host_name,
+            $log_level,
+            self::$log_id,
+        ];
+        $log_content   = json_encode([
+            "content" => $log,
+            "file"    => $_trace_file ?? null,
+            "line"    => $_trace_line ?? null
+        ]);
+
+        $this->fwrite(implode(" ", array_map(function($v) {
+                if (is_null($v) || $v === "") {
+                    return null;
+                }
+                return "[{$v}]";
+            }, $buffer_fields)) . " {$log_content}\n");
     }
 
     /**
@@ -105,8 +166,8 @@ class Logger extends \SplFileObject
      */
     public function emergency($message, array $context = array())
     {
-        $buffer = self::colorString("[" . self::EMERGENCY . "]\t" . $this->interpolate($message, $context), self::PURPLE);
-        $this->write($buffer);
+        $buffer = $this->interpolate($message, $context);
+        $this->write($buffer, self::EMERGENCY);
     }
 
     /**
@@ -117,8 +178,8 @@ class Logger extends \SplFileObject
      */
     public function alert($message, array $context = array())
     {
-        $buffer = self::colorString("[" . self::ALERT . "]\t" . $this->interpolate($message, $context), self::PURPLE);
-        $this->write($buffer);
+        $buffer = $this->interpolate($message, $context);
+        $this->write($buffer, self::ALERT);
     }
 
     /**
@@ -129,8 +190,8 @@ class Logger extends \SplFileObject
      */
     public function critical($message, array $context = array())
     {
-        $buffer = self::colorString("[" . self::CRITICAL . "]\t" . $this->interpolate($message, $context), self::PURPLE);
-        $this->write($buffer);
+        $buffer = $this->interpolate($message, $context);
+        $this->write($buffer, self::CRITICAL);
     }
 
     /**
@@ -140,8 +201,8 @@ class Logger extends \SplFileObject
      */
     public function error($message, array $context = array())
     {
-        $buffer = self::colorString("[" . self::ERROR . "]\t" . $this->interpolate($message, $context), self::RED);
-        $this->write($buffer);
+        $buffer = $this->interpolate($message, $context);
+        $this->write($buffer, self::ERROR);
     }
 
     /**
@@ -152,8 +213,8 @@ class Logger extends \SplFileObject
      */
     public function warning($message, array $context = array())
     {
-        $buffer = self::colorString("[" . self::WARNING . "]\t" . $this->interpolate($message, $context), self::YELLOW);
-        $this->write($buffer);
+        $buffer = $this->interpolate($message, $context);
+        $this->write($buffer, self::WARNING);
     }
 
     /**
@@ -163,8 +224,8 @@ class Logger extends \SplFileObject
      */
     public function notice($message, array $context = array())
     {
-        $buffer = self::colorString("[" . self::NOTICE . "]\t" . $this->interpolate($message, $context), self::WHITE);
-        $this->write($buffer);
+        $buffer = $this->interpolate($message, $context);
+        $this->write($buffer, self::NOTICE);
     }
 
     /**
@@ -175,8 +236,8 @@ class Logger extends \SplFileObject
      */
     public function info($message, array $context = array())
     {
-        $buffer = self::colorString("[" . self::INFO . "]\t" . $this->interpolate($message, $context), self::CYAN);
-        $this->write($buffer);
+        $buffer = $this->interpolate($message, $context);
+        $this->write($buffer, self::INFO);
     }
 
     /**
@@ -186,8 +247,8 @@ class Logger extends \SplFileObject
      */
     public function debug($message, array $context = array())
     {
-        $buffer = self::colorString("[" . self::DEBUG . "]\t" . $this->interpolate($message, $context), self::CYAN);
-        $this->write($buffer);
+        $buffer = $this->interpolate($message, $context);
+        $this->write($buffer, self::DEBUG);
     }
 
     public function logQuery($query, $class_name = null, $parse_time = 0, $action = 'Load')
@@ -211,7 +272,7 @@ class Logger extends \SplFileObject
             . " at " . date('Y-m-d H:i:s') . ")"
             . " [{$request->getMethod()}]" . "\t";
         $params = array() + $request->getParams() + $request->getQuery() + $request->getPost() + $request->getFiles();
-        $log .= json_encode($params);
+        $log    .= json_encode($params);
 
         $this->write($log);
     }
@@ -236,12 +297,11 @@ class Logger extends \SplFileObject
      * @param array $context
      * @return string
      */
-    function interpolate($message, array $context = array())
+    private function interpolate($message, array $context = array())
     {
         // 构建一个花括号包含的键名的替换数组
         $replace = array();
-        foreach ($context as $key => $val)
-        {
+        foreach ($context as $key => $val) {
             $replace['{' . $key . '}'] = is_array($val) ? json_encode($val) : $val;
         }
 
@@ -249,10 +309,9 @@ class Logger extends \SplFileObject
         return strtr($message, $replace);
     }
 
-    function colorString($string, $color = null)
+    private function colorString($string, $color = null)
     {
-        if ($color !== null)
-        {
+        if ($color !== null && self::$log_color) {
             return self::COLOR_SEQ . $color . $string . self::RESET_SEQ;
         }
         return $string;
