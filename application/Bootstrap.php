@@ -45,10 +45,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
      */
     private function _initConstant()
     {
-        defined("__TIME__") || define("__TIME__", time());
-        defined("__DATE__") || define("__DATE__", date('Y-m-d', __TIME__));
-        defined("__DATETIME__") || define("__DATETIME__", date('Y-m-d H:i:s', __TIME__));
-        defined("CONF_PATH") || define("CONF_PATH", APP_PATH . '/config');
+        Yaf_Loader::import(APP_PATH . "/include/const.php");
     }
 
     private function _initTimezone()
@@ -64,7 +61,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
 
     private function _initFuntion()
     {
-        Yaf_Loader::import(APP_PATH . '/include/Function.php');
+        Yaf_Loader::import(APP_PATH . '/include/function.php');
     }
 
     //private function _initRequest(Yaf_Dispatcher $dispatcher)
