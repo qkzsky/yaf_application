@@ -23,23 +23,12 @@ class TestCase extends \PHPUnit\Framework\TestCase
      *
      * @var \Yaf\Application
      */
-    protected $_application = null;
+    protected static $_application = null;
 
     protected function setUp()
     {
-        $this->setApplication();
-
+        $this->getApplication();
         parent::setUp();
-    }
-
-    /**
-     * 设置application
-     */
-    public function setApplication()
-    {
-        $application = new \Yaf_Application(APP_PATH . "/config/application.ini", YAF_ENVIRON);
-        $application->bootstrap();
-        $this->_application = $application;
     }
 
     /**
@@ -49,9 +38,10 @@ class TestCase extends \PHPUnit\Framework\TestCase
      */
     public function getApplication()
     {
-        if (self::$_application == null) {
-            $this->setApplication();
+        if (self::$_application === null) {
+            self::$_application = new \Yaf_Application(APP_PATH . "/config/application.ini", YAF_ENVIRON);
+            self::$_application->bootstrap();
         }
-        return $this->_application;
+        return self::$_application;
     }
 }
