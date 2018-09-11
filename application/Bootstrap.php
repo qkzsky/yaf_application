@@ -51,7 +51,6 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
     private function _initTimezone()
     {
         ini_set("date.timezone", Yaf_Application::app()->getConfig()->application->timezone);
-
     }
 
     private function _initIncludePath()
