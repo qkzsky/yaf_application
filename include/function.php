@@ -485,10 +485,10 @@ function long2ipfix($ip_32)
             $ip  = $tmp[3] . "." . $tmp[2] . "." . $tmp[1] . "." . $tmp[0];
             break;
 
-        case pack('V', $foo):
+        // case pack('V', $foo):
             //big-endian
             //Nothing
-            break;
+            // break;
         default:
     }
 
