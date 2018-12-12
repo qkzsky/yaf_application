@@ -183,20 +183,24 @@ class HttpClient
     /**
      * 设置请求的内容
      * @param string|array $data
-     * @return bool
+     * @return bool|void
      */
     public function setRequestBody($data)
     {
-//        if (is_array($data))
-//        {
-//            $this->_request_data = http_build_query($data);
-//        }
-//        else
-//        {
+        if (is_array($data)) {
+            $has_file = false;
+            foreach ($data as $item) {
+                if ($item instanceof CURLFile) {
+                    $has_file = true;
+                    break;
+                }
+            }
+            if (!$has_file) {
+                $this->_request_data = http_build_query($data);
+                return;
+            }
+        }
         $this->_request_data = $data;
-//        }
-
-        return true;
     }
 
     /**

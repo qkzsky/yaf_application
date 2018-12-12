@@ -59,7 +59,7 @@ class Redis
             {
                 $redis->select($db_config->db);
             }
-            if (isset($db_config->auth) && isset($db_config->auth))
+            if (isset($db_config->auth))
             {
                 $redis->auth($db_config->auth);
             }

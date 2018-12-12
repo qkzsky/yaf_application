@@ -325,7 +325,7 @@ class Mysql
      * @return array
      * @throws \Exception
      */
-    public function fetchAll($sql, array $parameters = array(), $mode = \PDO::FETCH_ASSOC)
+    public function fetchAll($sql, array $parameters = array(), int $mode = \PDO::FETCH_ASSOC)
     {
         $result = $this->execute($sql, $parameters);
         $result->setFetchMode($mode);
@@ -340,7 +340,7 @@ class Mysql
      * @return array
      * @throws \Exception
      */
-    public function fetchRow($sql, array $parameters = array(), $mode = \PDO::FETCH_ASSOC)
+    public function fetchRow($sql, array $parameters = array(), int $mode = \PDO::FETCH_ASSOC)
     {
         $result = $this->execute($sql, $parameters);
         $result->setFetchMode($mode);
@@ -393,7 +393,7 @@ class Mysql
      * @return array
      * @throws \Exception
      */
-    public function fetchMap($sql, array $parameters = array(), array $key_fields = array(), array $val_fields = array(), $mode = \PDO::FETCH_ASSOC)
+    public function fetchMap($sql, array $parameters = array(), array $key_fields = array(), array $val_fields = array(), int $mode = \PDO::FETCH_ASSOC)
     {
         $result = $this->execute($sql, $parameters);
         $result->setFetchMode($mode);
