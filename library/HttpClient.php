@@ -38,6 +38,12 @@ class HttpClient
     private $_request_data;
 
     /**
+     * 请求内容，用于query参数补充
+     * @var string
+     */
+    private $_request_query = [];
+
+    /**
      * 请求方法，默认是POST 方法
      * @var string
      */
@@ -196,7 +202,8 @@ class HttpClient
                 }
             }
             if (!$has_file) {
-                $this->_request_data = http_build_query($data);
+                $this->_request_data  = http_build_query($data);
+                $this->_request_query = $this->_request_data;
                 return;
             }
         }
@@ -440,8 +447,8 @@ class HttpClient
             curl_setopt($ch, CURLOPT_PROXY, $this->_proxy);
         }
         if ($this->_method == 'GET') {
-            if ($this->_request_data !== null && is_array($this->_request_data)) {
-                $this->_request_url .= ((strpos($this->_request_url, '?') === false) ? '?' : '&') . http_build_query($this->_request_data);
+            if (!empty($this->_request_query)) {
+                $this->_request_url .= ((strpos($this->_request_url, '?') === false) ? '?' : '&') . $this->_request_query;
             }
             curl_setopt($ch, CURLOPT_URL, $this->_request_url);
         } else {
