@@ -38,10 +38,10 @@ class Redis
     }
 
     /**
-     * @param object $_config
+     * @param \Yaf_Config_Ini $_config
      * @return \Redis
      */
-    private function getConnect(object $_config)
+    private function getConnect(\Yaf_Config_Ini $_config)
     {
         $redis = new \Redis();
         $redis->connect($_config->host, $_config->port, self::$_connect_timeout);//设置option
