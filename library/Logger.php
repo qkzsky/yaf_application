@@ -146,7 +146,7 @@ class Logger extends \SplFileObject
             self::$log_id,
         ];
         $log_content   = json_encode([
-            "content" => $log,
+            "content" => str_replace(["\r\n", "\n"], "\\n", $log),
             "file"    => $_trace_file ?? null,
             "line"    => $_trace_line ?? null
         ]);
