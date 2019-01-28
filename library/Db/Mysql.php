@@ -182,7 +182,7 @@ class Mysql
             try {
                 $this->_db[$db_key] = new \PDO($dsn, $db_config->username, $db_config->password, $driver_options);
             } catch (\Exception $e) {
-                \Logger::getLogger()->log('Caught exception: ' . $e->getMessage());
+                \Logger::getLogger()->log('Caught exception: ' . $e->getMessage() . "\t" . $dsn);
                 if ($retry_attempt < self::RETRY_ATTEMPTS) {
                     $retry_attempt++;
                     goto try_connect;
