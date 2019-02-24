@@ -17,11 +17,16 @@
  *
  * @author kuangzhiqiang
  */
-class IndexController extends Yaf_Controller_Abstract
+class IndexController extends ApplicationController
 {
 
     public function indexAction()
     {
         $this->display("index", array("content" => "Demo"));
+    }
+
+    public function unitAction()
+    {
+        $this->responseText("unit test");
     }
 }
