@@ -27,3 +27,4 @@ Thumbs.db
 # project
 log/
 compile/
+tests/.phpunit.result.cache
