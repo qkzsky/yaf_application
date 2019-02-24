@@ -23,5 +23,11 @@ class DemoModel
     {
         echo "IS DEMO MODEL";
     }
+
     //put your code here
+
+    public function add($a, $b)
+    {
+        return $a + $b;
+    }
 }
