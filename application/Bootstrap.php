@@ -183,6 +183,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
      */
     public static function error_handler($errno, $errstr, $errfile, $errline)
     {
+        $log_exception = false;
         switch ($errno) {
             case YAF_ERR_AUTOLOAD_FAILED:
             case YAF_ERR_NOTFOUND_MODULE:
@@ -190,17 +191,25 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
             case YAF_ERR_NOTFOUND_ACTION:
                 break;
             default:
-                // $request = Yaf_Application::app()->getDispatcher()->getRequest();
-                // $_uri    = sprintf("%s-%s-%s", $request->getModuleName(), $request->getControllerName(), $request->getActionName());
+                $log_exception = true;
+                $request       = Yaf_Application::app()->getDispatcher()->getRequest();
+                $_uri          = sprintf("%s-%s-%s", $request->getModuleName(), $request->getControllerName(), $request->getActionName());
+                \Logger::getLogger()->error(json_encode([
+                    "errno"       => $errno,
+                    "errstr"      => $errstr,
+                    "errfile"     => $errfile,
+                    "errline"     => $errline,
+                    "request_uri" => $_uri
+                ]));
                 // \StatsD::count(sprintf("log.exception.%s", $_uri), 1);
                 break;
         }
 
-        $exception = new ErrorException($errstr, $errno, 1, $errfile, $errline);
+        $exception = new \ErrorException($errstr, $errno, 1, $errfile, $errline);
         if (error_reporting() & $errno) {
             throw $exception;
-        } else if (isset($_uri)) {
-            Logger::getLogger()->logException($exception);
+        } else if ($log_exception) {
+            \Logger::getLogger()->logException($exception);
         }
     }
 
