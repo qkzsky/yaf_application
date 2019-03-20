@@ -193,7 +193,6 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
         // Of particular note is that this value will be 0
         // if the statement that caused the error was prepended
         // by the @ error-control operator.
-        //
 
         if (error_reporting() & $errno) {
             throw new ErrorException($errstr, $errno, 1, $errfile, $errline);
