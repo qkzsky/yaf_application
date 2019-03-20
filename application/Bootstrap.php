@@ -196,7 +196,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
         //
 
         if (error_reporting() & $errno) {
-            throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+            throw new ErrorException($errstr, $errno, 1, $errfile, $errline);
         }
     }
 
