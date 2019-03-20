@@ -183,19 +183,24 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
      */
     public static function error_handler($errno, $errstr, $errfile, $errline)
     {
-        // Do not throw exception if error was prepended by @
-        //
-        // See {@link http://www.php.net/set_error_handler}
-        //
-        // error_reporting() settings will have no effect and your error handler
-        // will be called regardless - however you are still able to read
-        // the current value of error_reporting and act appropriately.
-        // Of particular note is that this value will be 0
-        // if the statement that caused the error was prepended
-        // by the @ error-control operator.
+        switch ($errno) {
+            case YAF_ERR_AUTOLOAD_FAILED:
+            case YAF_ERR_NOTFOUND_MODULE:
+            case YAF_ERR_NOTFOUND_CONTROLLER:
+            case YAF_ERR_NOTFOUND_ACTION:
+                break;
+            default:
+                // $request = Yaf_Application::app()->getDispatcher()->getRequest();
+                // $_uri    = sprintf("%s-%s-%s", $request->getModuleName(), $request->getControllerName(), $request->getActionName());
+                // \StatsD::count(sprintf("log.exception.%s", $_uri), 1);
+                break;
+        }
 
+        $exception = new ErrorException($errstr, $errno, 1, $errfile, $errline);
         if (error_reporting() & $errno) {
-            throw new ErrorException($errstr, $errno, 1, $errfile, $errline);
+            throw $exception;
+        } else if (isset($_uri)) {
+            Logger::getLogger()->logException($exception);
         }
     }
 
