@@ -172,9 +172,10 @@ class Mysql
                 \PDO::ATTR_EMULATE_PREPARES   => false,
                 \PDO::ATTR_TIMEOUT            => self::CONNECT_TIMEOUT,
                 \PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
-                \PDO::ATTR_PERSISTENT         => $this->_p_connect,
+                \PDO::ATTR_PERSISTENT         => (bool) ($db_config->pconnect ?? $this->_p_connect),
                 \PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES {$charset}",
             );
+            var_dump($driver_options);exit;
 
             $start_time    = microtime(true);
             $retry_attempt = 0;
