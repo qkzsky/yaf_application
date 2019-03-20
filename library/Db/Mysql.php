@@ -175,7 +175,6 @@ class Mysql
                 \PDO::ATTR_PERSISTENT         => (bool) ($db_config->pconnect ?? $this->_p_connect),
                 \PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES {$charset}",
             );
-            var_dump($driver_options);exit;
 
             $start_time    = microtime(true);
             $retry_attempt = 0;
