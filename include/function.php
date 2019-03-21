@@ -473,23 +473,25 @@ function get_client_ip()
     return $ip;
 }
 
-function long2ipfix($ip_32)
+function long2ipfix(int $ip_32)
 {
     $ip = long2ip($ip_32);
     //先判断是big-endian还是little-endian
-    $foo = 0x3456789a;
-    switch (pack('L', $foo)) {
-        case pack('V', $foo):
-            //little-endian
-            $tmp = explode(".", $ip);
-            $ip  = $tmp[3] . "." . $tmp[2] . "." . $tmp[1] . "." . $tmp[0];
-            break;
+    if (version_compare(PHP_VERSION, '7.0.0', '<')) {
+        $foo = 0x3456789a;
+        switch (pack('L', $foo)) {
+            case pack('V', $foo):
+                //little-endian
+                $tmp = explode(".", $ip);
+                $ip  = $tmp[3] . "." . $tmp[2] . "." . $tmp[1] . "." . $tmp[0];
+                break;
 
-        // case pack('V', $foo):
+            // case pack('V', $foo):
             //big-endian
             //Nothing
             // break;
-        default:
+            default:
+        }
     }
 
     return $ip;
@@ -507,10 +509,19 @@ function ip2longfix($ip)
     }
 
     $ip_arr = explode('.', $ip);
-    $iplong = ($ip_arr[0] << 24) +
-        ($ip_arr[1] << 16) +
-        ($ip_arr[2] << 8) +
-        $ip_arr[3];
+    if (count($ip_arr) !== 4) {
+        return false;
+    }
+    foreach ($ip_arr as $v) {
+        if (!is_numeric($v) || strpos($v, ".") !== false) {
+            return false;
+        }
+        if ($v < 0 || $v > 255) {
+            return false;
+        }
+    }
+
+    $iplong = ($ip_arr[0] << 24) | ($ip_arr[1] << 16) | ($ip_arr[2] << 8) | $ip_arr[3];
     return $iplong;
 }
 
