@@ -61,6 +61,8 @@ class ErrorController extends Yaf_Controller_Abstract
                 }
                 break;
             default:
+                $_uri = sprintf("%s-%s-%s", $this->getRequest()->getModuleName(), $this->getRequest()->getControllerName(), $this->getRequest()->getActionName());
+                // \StatsD::count(sprintf("log.exception.%s", $_uri), 1);
                 // send_http_status(500);
                 break;
         }
