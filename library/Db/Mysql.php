@@ -432,6 +432,54 @@ class Mysql
     }
 
     /**
+     * 对查询结果进行按字段分组
+     * @param string $sql
+     * @param array $parameters
+     * @param array $key_fields 用于分组的key,多个代表多维
+     * @param array $val_fields 分组的值
+     * @param int $mode
+     * @return array
+     * @throws \Exception
+     */
+    public function fetchGroup($sql, array $parameters = array(), array $key_fields = array(), array $val_fields = array(), int $mode = \PDO::FETCH_ASSOC)
+    {
+        $result = $this->execute($sql, $parameters);
+        $result->setFetchMode($mode);
+        $val_fields = array_values($val_fields);
+
+        $data = array();
+        while ($row = $result->fetch()) {
+            if (empty($val_fields)) {
+                $val_data = $row;
+            } elseif (count($val_fields) === 1) {
+                $val_key  = $val_fields[0];
+                $val_data = isset($row[$val_key]) ? $row[$val_key] : null;
+            } else {
+                $val_data = [];
+                foreach ($val_fields as $val_key) {
+                    $val_data[$val_key] = isset($row[$val_key]) ? $row[$val_key] : null;
+                }
+            }
+
+            $_node = &$data;
+            foreach ($key_fields as $key) {
+                if (!isset($row[$key])) {
+                    throw new \AppException(sprintf("not found key fields [%s]", $key), \ErrorCode::INVALID_PARAMETER);
+                }
+                $_key = $row[$key];
+                if (!isset($_node[$_key])) {
+                    $_node[$_key] = [];
+                }
+                $_node = &$_node[$_key];
+            }
+            $_node[] = $val_data;
+            unset($_node);
+        }
+
+        return $data;
+    }
+
+    /**
      * 新增数据
      * @param $table
      * @param array $data
