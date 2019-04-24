@@ -557,7 +557,7 @@ function arguments(array $argv)
         if (preg_match('/--([^=]+)=(.*)/', $arg, $reg)) {
             $_ARG[$reg[1]] = $reg[2];
         } elseif (preg_match('/^-([a-zA-Z0-9])/', $arg, $reg)) {
-            $_ARG[$reg[1]] = 'true';
+            $_ARG[$reg[1]] = true;
         }
     }
     return $_ARG;

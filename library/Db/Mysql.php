@@ -401,24 +401,31 @@ class Mysql
 
         $data = array();
         while ($row = $result->fetch()) {
-            $key_string = '';
-            foreach ($key_fields as $key) {
-                $key_string .= "[" . (isset($row[$key]) ? "'{$row[$key]}'" : '') . "]";
-            }
-
-            $val_data = array();
             if (empty($val_fields)) {
                 $val_data = $row;
             } elseif (count($val_fields) === 1) {
                 $val_key  = $val_fields[0];
                 $val_data = isset($row[$val_key]) ? $row[$val_key] : null;
             } else {
+                $val_data = [];
                 foreach ($val_fields as $val_key) {
                     $val_data[$val_key] = isset($row[$val_key]) ? $row[$val_key] : null;
                 }
             }
 
-            eval("\$data{$key_string}=\$val_data;");
+            $_node = &$data;
+            foreach ($key_fields as $key) {
+                if (!isset($row[$key])) {
+                    throw new \AppException(sprintf("not found key fields [%s]", $key), \ErrorCode::INVALID_PARAMETER);
+                }
+                $_key = $row[$key];
+                if (!isset($_node[$_key])) {
+                    $_node[$_key] = [];
+                }
+                $_node = &$_node[$_key];
+            }
+            $_node = $val_data;
+            unset($_node);
         }
 
         return $data;
