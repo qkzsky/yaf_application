@@ -387,13 +387,13 @@ class Mysql
      * 对查询结果进行按字段分组
      * @param string $sql
      * @param array $parameters
-     * @param array $key_fields 用于分组的key,多个代表多维
+     * @param array $map_fields 用于分组的key,多个代表多维
      * @param array $val_fields 分组的值
      * @param int $mode
      * @return array
      * @throws \Exception
      */
-    public function fetchMap($sql, array $parameters = array(), array $key_fields = array(), array $val_fields = array(), int $mode = \PDO::FETCH_ASSOC)
+    public function fetchMap($sql, array $parameters = array(), array $map_fields = array(), array $val_fields = array(), int $mode = \PDO::FETCH_ASSOC)
     {
         $result = $this->execute($sql, $parameters);
         $result->setFetchMode($mode);
@@ -414,7 +414,7 @@ class Mysql
             }
 
             $_node = &$data;
-            foreach ($key_fields as $key) {
+            foreach ($map_fields as $key) {
                 if (!isset($row[$key])) {
                     throw new \AppException(sprintf("not found key fields [%s]", $key), \ErrorCode::INVALID_PARAMETER);
                 }
@@ -435,13 +435,13 @@ class Mysql
      * 对查询结果进行按字段分组
      * @param string $sql
      * @param array $parameters
-     * @param array $key_fields 用于分组的key,多个代表多维
+     * @param array $group_fields 用于分组的key,多个代表多维
      * @param array $val_fields 分组的值
      * @param int $mode
      * @return array
      * @throws \Exception
      */
-    public function fetchGroup($sql, array $parameters = array(), array $key_fields = array(), array $val_fields = array(), int $mode = \PDO::FETCH_ASSOC)
+    public function fetchGroup($sql, array $parameters = array(), array $group_fields = array(), array $val_fields = array(), int $mode = \PDO::FETCH_ASSOC)
     {
         $result = $this->execute($sql, $parameters);
         $result->setFetchMode($mode);
@@ -462,7 +462,7 @@ class Mysql
             }
 
             $_node = &$data;
-            foreach ($key_fields as $key) {
+            foreach ($group_fields as $key) {
                 if (!isset($row[$key])) {
                     throw new \AppException(sprintf("not found key fields [%s]", $key), \ErrorCode::INVALID_PARAMETER);
                 }
