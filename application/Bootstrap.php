@@ -216,7 +216,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
                     "errline"     => $errline,
                     "request_uri" => $_uri
                 ]));
-                $log_exception && \StatsD::count(sprintf("log.exception.%s", $_uri), 1);
+                // $log_exception && \StatsD::count(sprintf("log.exception.%s", $_uri), 1);
                 break;
         }
 
