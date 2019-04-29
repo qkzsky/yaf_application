@@ -139,11 +139,11 @@ class Logger extends \SplFileObject
         }
 
         $buffer_fields = [
-            date('Y-m-d H:i:s'),
-            self::$service_name,
+            date("c"),
             self::$host_name,
-            $log_level,
+            self::$service_name,
             self::$log_id,
+            $log_level,
         ];
         $log_content   = json_encode([
             "content" => str_replace(["\r\n", "\n"], "\\n", $log),
@@ -152,10 +152,7 @@ class Logger extends \SplFileObject
         ]);
 
         $this->fwrite(implode(" ", array_map(function($v) {
-                if (is_null($v) || $v === "") {
-                    return null;
-                }
-                return "[{$v}]";
+                return (is_null($v) || $v === "") ? "-" : $v;
             }, $buffer_fields)) . " {$log_content}\n");
     }
 
