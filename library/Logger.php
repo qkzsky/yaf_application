@@ -151,7 +151,7 @@ class Logger extends \SplFileObject
             "line"    => $_trace_line ?? null
         ]);
 
-        $this->fwrite(implode(" ", array_map(function($v) {
+        $this->fwrite(implode("\t", array_map(function($v) {
                 return (is_null($v) || $v === "") ? "-" : $v;
             }, $buffer_fields)) . " {$log_content}\n");
     }
