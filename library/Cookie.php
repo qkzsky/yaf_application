@@ -28,13 +28,18 @@ class Cookie
     // 有效域名
     private $_domain = null;
 
+    private $_secure   = false;
+    private $_httponly = false;
+
     public function __construct()
     {
-        $config        = Yaf_Application::app()->getConfig()->cookie;
-        $this->_prefix = isset($config->prefix) ? $config->prefix : null;
-        $this->_expire = isset($config->expire) ? (int)$config->expire : 0;
-        $this->_path   = isset($config->path) ? $config->path : null;
-        $this->_domain = isset($config->domain) ? $config->domain : null;
+        $config          = Yaf_Application::app()->getConfig()->cookie;
+        $this->_prefix   = isset($config->prefix) ? $config->prefix : "";
+        $this->_expire   = isset($config->expire) ? (int) $config->expire : 0;
+        $this->_path     = isset($config->path) ? $config->path : "";
+        $this->_domain   = isset($config->domain) ? $config->domain : "";
+        $this->_secure   = isset($config->secure) ? (bool) $config->secure : false;
+        $this->_httponly = isset($config->httponly) ? (bool) $config->httponly : false;
     }
 
     /**
@@ -53,7 +58,7 @@ class Cookie
      */
     public function setPrefix($prefix)
     {
-        $this->_prefix = (string)$prefix;
+        $this->_prefix = (string) $prefix;
         return $this;
     }
 
@@ -64,7 +69,7 @@ class Cookie
      */
     public function setExpire($expire)
     {
-        $this->_expire = (int)$expire;
+        $this->_expire = (int) $expire;
         return $this;
     }
 
@@ -75,7 +80,7 @@ class Cookie
      */
     public function setPath($path)
     {
-        $this->_path = (string)$path;
+        $this->_path = (string) $path;
         return $this;
     }
 
@@ -86,7 +91,7 @@ class Cookie
      */
     public function setDomain($domain)
     {
-        $this->_domain = (string)$domain;
+        $this->_domain = (string) $domain;
         return $this;
     }
 
@@ -97,8 +102,7 @@ class Cookie
      */
     public function get($name = null)
     {
-        if ($name === null)
-        {
+        if ($name === null) {
             return $_COOKIE;
         }
         return isset($_COOKIE[$this->_prefix . $name]) ? $_COOKIE[$this->_prefix . $name] : null;
@@ -106,8 +110,8 @@ class Cookie
 
     public function set($name, $value)
     {
-        $_expire = $this->_expire ? time() + $this->_expire : 0;
-        setcookie($this->_prefix . $name, $value, $_expire, $this->_path, $this->_domain);
+        $_expire = $this->_expire ? (time() + $this->_expire) : 0;
+        setcookie($this->_prefix . $name, $value, $_expire, $this->_path, $this->_domain, $this->_secure, $this->_httponly);
     }
 
     /**
@@ -116,9 +120,8 @@ class Cookie
      */
     public function del($name)
     {
-        if (isset($_COOKIE[$this->_prefix . $name]))
-        {
-            setcookie($this->_prefix . $name, null, time() - 3600, $this->_path, $this->_domain);
+        if (isset($_COOKIE[$this->_prefix . $name])) {
+            setcookie($this->_prefix . $name, null, time() - 3600, $this->_path, $this->_domain, $this->_secure, $this->_httponly);
             unset($_COOKIE[$name]);
         }
     }
@@ -128,17 +131,14 @@ class Cookie
      */
     public function clear()
     {
-        if (empty($_COOKIE))
-        {
+        if (empty($_COOKIE)) {
             return;
         }
 
-        foreach ($_COOKIE as $key => $val)
-        {
+        foreach ($_COOKIE as $key => $val) {
             // 删除config设置的指定前缀
-            if ($this->_prefix === null || 0 === stripos($key, $this->_prefix))
-            {
-                setcookie($key, null, time() - 3600, $this->_path, $this->_domain);
+            if ($this->_prefix === null || 0 === stripos($key, $this->_prefix)) {
+                setcookie($key, null, time() - 3600, $this->_path, $this->_domain, $this->_secure, $this->_httponly);
                 unset($_COOKIE[$key]);
             }
         }
