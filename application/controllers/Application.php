@@ -43,7 +43,7 @@ class ApplicationController extends Yaf_Controller_Abstract
             $session_conf = \Yaf_Application::app()->getConfig()->session;
             if (!session_id()) {
                 session_name($session_conf->name ?? "session");
-                ini_set("session.cookie_httponly", (bool) $session_conf->cookie_httponly);
+                ini_set("session.cookie_httponly", (bool) $session_conf->cookie_httponly ?? true);
                 if (!empty($session_conf->save_handler) && !empty($session_conf->save_path)) {
                     ini_set("session.save_handler", $session_conf->save_handler);
                     ini_set("session.save_path", $session_conf->save_path);
