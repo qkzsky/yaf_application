@@ -88,6 +88,10 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
         if (Yaf_Application::app()->getConfig()->application->xhprof && extension_loaded('xhprof')) {
             $dispatcher->registerPlugin(new XhprofPlugin());
         }
+
+        if (Yaf_Application::app()->getConfig()->application->safe_referer) {
+            $dispatcher->registerPlugin(new RefererPlugin());
+        }
         // $dispatcher->registerPlugin(new SamplePlugin());
 
         //        if ($this->config->application->protect_from_csrf && !$dispatcher->getRequest()->isCli())
