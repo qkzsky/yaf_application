@@ -414,6 +414,7 @@ class Mysql
             }
 
             $_node = &$data;
+            $_path = "";
             foreach ($map_fields as $key) {
                 if (!isset($row[$key])) {
                     throw new \AppException(sprintf("not found key fields [%s]", $key), \ErrorCode::INVALID_PARAMETER);
@@ -422,7 +423,11 @@ class Mysql
                 if (!isset($_node[$_key])) {
                     $_node[$_key] = [];
                 }
+                $_path .= ($_path ? "." : "") . str_replace(".", "_", $_key);
                 $_node = &$_node[$_key];
+            }
+            if (!empty($_node)) {
+                throw new \AppException(sprintf("keys repeat [%s]", $_path), \ErrorCode::INVALID_PARAMETER);
             }
             $_node = $val_data;
             unset($_node);
