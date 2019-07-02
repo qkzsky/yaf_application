@@ -723,3 +723,70 @@ function timeSince(string $time, string $unit = null, $get_as_float = false)
 
     return $result;
 }
+
+/**
+ * show a progress bar in the console
+ *
+ * <code>
+ * for($x=1;$x<=100;$x++){
+ *
+ *     show_progress($x, 100);
+ *
+ *     usleep(100000);
+ *
+ * }
+ * </code>
+ *
+ * @param int $done how many items are completed
+ * @param int $total how many items are to be done total
+ * @param int $size optional size of the status bar
+ * @return  void
+ *
+ */
+function show_progress(int $done, int $total, $size = 30)
+{
+    static $start_time;
+
+    // if we go over our bound, just ignore it
+    if ($done > $total) {
+        return;
+    }
+
+    if (empty($start_time)) {
+        $start_time = time();
+    }
+    $now = time();
+
+    $percent = (double) ($done / $total);
+
+    $bar = floor($percent * $size);
+
+    // [===============================] 100.00%  10284/10284 remaining: 0 sec.  elapsed: 142 sec.
+
+    $status_bar = "[";
+    $status_bar .= str_repeat("=", $bar);
+    if ($bar < $size) {
+        $status_bar .= ">" . str_repeat(" ", $size - $bar);
+    } else {
+        $status_bar .= "=";
+    }
+    $status_bar .= "]";
+
+    $elapsed = $now - $start_time;
+
+    $rate = $elapsed / $done;
+    $left = $total - $done;
+    $eta  = round($rate * $left, 2);
+
+    $total_len = strlen($total);
+    $show_bar = sprintf("\r%s %5.2f%%  %{$total_len}d/%d remaining: %3d sec.  elapsed: %3d sec. ", $status_bar, number_format($percent * 100, 2), $done, $total, number_format($eta), number_format($elapsed));
+    echo $show_bar;
+
+    flush();
+
+    // when done, send a newline
+    if ($done == $total) {
+        $start_time = 0;
+        echo "\n";
+    }
+}
