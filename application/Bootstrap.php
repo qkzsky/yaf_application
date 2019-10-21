@@ -198,27 +198,37 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
                 $log_exception = true;
                 $request       = Yaf_Application::app()->getDispatcher()->getRequest();
                 $_uri          = sprintf("%s-%s-%s", $request->getModuleName(), $request->getControllerName(), $request->getActionName());
-                $log_func      = "notice";
-                if (error_reporting() & $errno) {
-                    $log_func = "error";
-                } else {
-                    // 满足特定规则的不记录exception信息、打点统计，只保留notice日志
-                    $patterns = [
-                        '/^PDO::__construct\(\).+errno=110/',
-                    ];
-                    foreach ($patterns as $p) {
-                        if (preg_match($p, $errstr)) {
-                            $log_exception = false;
-                            break;
-                        }
+
+                switch ($errno) {
+                    case E_WARNING:
+                        $log_func = "warning";
+                        break;
+                    case E_NOTICE:
+                        $log_func = "notice";
+                        break;
+                    default:
+                        $log_func = "error";
+                        break;
+                }
+
+                // 满足特定规则的不记录exception信息、打点统计，只保留notice日志
+                $patterns = [
+                    '/^PDO::__construct\(\)/',
+                ];
+                foreach ($patterns as $p) {
+                    if (preg_match($p, $errstr)) {
+                        $log_exception = false;
+                        break;
                     }
                 }
+
                 \Logger::getLogger()->$log_func(json_encode([
-                    "errno"       => $errno,
-                    "errstr"      => $errstr,
-                    "errfile"     => $errfile,
-                    "errline"     => $errline,
-                    "request_uri" => $_uri
+                    "errno"           => $errno,
+                    "errstr"          => $errstr,
+                    "errfile"         => $errfile,
+                    "errline"         => $errline,
+                    "error_reporting" => error_reporting(),
+                    "request_uri"     => $_uri
                 ]));
                 // $log_exception && \StatsD::count(sprintf("log.exception.%s", $_uri), 1);
                 break;
