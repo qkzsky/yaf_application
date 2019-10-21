@@ -230,15 +230,16 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
                     "error_reporting" => error_reporting(),
                     "request_uri"     => $_uri
                 ]));
-                // $log_exception && \StatsD::count(sprintf("log.exception.%s", $_uri), 1);
                 break;
         }
 
         $exception = new \ErrorException($errstr, $errno, 1, $errfile, $errline);
         if (error_reporting() & $errno) {
             throw $exception;
-        } else if ($log_exception) {
+        }
+        if ($log_exception) {
             \Logger::getLogger()->logException($exception);
+            // \StatsD::count(sprintf("log.exception.%s", $_uri), 1);
         }
     }
 
