@@ -28,3 +28,6 @@ Thumbs.db
 log/
 compile/
 tests/.phpunit.result.cache
+
+# composer
+vendor/
