@@ -58,7 +58,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
         // set_include_path(get_include_path() . PATH_SEPARATOR . $this->config->application->library);
     }
 
-    private function _initFuntion()
+    private function _initFunction()
     {
         Yaf_Loader::import(APP_PATH . '/include/function.php');
     }
