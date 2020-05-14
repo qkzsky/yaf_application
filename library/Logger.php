@@ -276,7 +276,7 @@ class Logger extends \SplFileObject
 
     public function logException($exception)
     {
-        $log = self::colorString(get_class($exception) . ": "
+        $log = "[exception]\t" . self::colorString(get_class($exception) . ": "
                 . $exception->getMessage()
                 . " in file "
                 . $exception->getFile()

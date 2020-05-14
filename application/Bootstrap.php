@@ -21,7 +21,7 @@
 class Bootstrap extends Yaf_Bootstrap_Abstract
 {
 
-    private function _initErrors(Yaf_Dispatcher $dispatcher)
+    public function _initErrors(Yaf_Dispatcher $dispatcher)
     {
         error_reporting(-1);
         //报错是否开启
@@ -43,27 +43,27 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
     /**
      * 定义一些常量
      */
-    private function _initConstant()
+    public function _initConstant()
     {
         Yaf_Loader::import(APP_PATH . "/include/const.php");
     }
 
-    private function _initTimezone()
+    public function _initTimezone()
     {
         ini_set("date.timezone", Yaf_Application::app()->getConfig()->application->timezone);
     }
 
-    private function _initIncludePath()
+    public function _initIncludePath()
     {
         // set_include_path(get_include_path() . PATH_SEPARATOR . $this->config->application->library);
     }
 
-    private function _initFunction()
+    public function _initFunction()
     {
         Yaf_Loader::import(APP_PATH . '/include/function.php');
     }
 
-    //private function _initRequest(Yaf_Dispatcher $dispatcher)
+    //public function _initRequest(Yaf_Dispatcher $dispatcher)
     //{
     //    $dispatcher->setRequest(new \Request());
     //}
@@ -72,17 +72,18 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
      * 初始化视图，如果有自己的视图工具，关闭其自动渲染
      * @param Yaf_Dispatcher $dispatcher
      */
-    private function _initView(Yaf_Dispatcher $dispatcher)
+    public function _initView(Yaf_Dispatcher $dispatcher)
     {
         // 关闭自动渲染
         $dispatcher->disableView();
         // todo
         // 在这注册自己的view控制器
         $layout = new \Layout(Yaf_Application::app()->getConfig()->application->layout->directory);
+        $layout->setScriptPath(Yaf_Application::app()->getConfig()->application->directory . "/views");
         $dispatcher->setView($layout);
     }
 
-    private function _initPlugin(Yaf_Dispatcher $dispatcher)
+    public function _initPlugin(Yaf_Dispatcher $dispatcher)
     {
         // $dispatcher->registerPlugin(new LogPlugin());
         if (Yaf_Application::app()->getConfig()->application->xhprof && extension_loaded('xhprof')) {
@@ -100,7 +101,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
         //        }
     }
 
-    private function _initLoader(Yaf_Dispatcher $dispatcher)
+    public function _initLoader(Yaf_Dispatcher $dispatcher)
     {
         spl_autoload_register(["Loader", "loaderService"], true, true);
         $vendor_autoload = APP_PATH . '/vendor/autoload.php';
@@ -113,7 +114,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
      * 路由设置
      * @param Yaf_Dispatcher $dispatcher
      */
-    private function _initRoute(Yaf_Dispatcher $dispatcher)
+    public function _initRoute(Yaf_Dispatcher $dispatcher)
     {
         $router = $dispatcher->getRouter();
 
@@ -129,7 +130,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
      *
      * Allows to load extra settings per module, like routes etc.
      */
-    private function _initModules(Yaf_Dispatcher $dispatcher)
+    public function _initModules(Yaf_Dispatcher $dispatcher)
     {
         $app = $dispatcher->getApplication();
 

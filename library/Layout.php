@@ -131,7 +131,7 @@ class Layout implements \Yaf_View_Interface
      *
      * @return string
      */
-    public function getScriptPath()
+    public function getScriptPath($request = NULL)
     {
         return $this->engine()->getScriptPath();
     }
