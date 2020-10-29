@@ -163,7 +163,7 @@ class Logger extends \SplFileObject
      */
     public function emergency($message, array $context = array())
     {
-        $buffer = $this->interpolate($message, $context);
+        $buffer = self::interpolate($message, $context);
         $this->write($buffer, self::EMERGENCY);
     }
 
@@ -175,7 +175,7 @@ class Logger extends \SplFileObject
      */
     public function alert($message, array $context = array())
     {
-        $buffer = $this->interpolate($message, $context);
+        $buffer = self::interpolate($message, $context);
         $this->write($buffer, self::ALERT);
     }
 
@@ -187,7 +187,7 @@ class Logger extends \SplFileObject
      */
     public function critical($message, array $context = array())
     {
-        $buffer = $this->interpolate($message, $context);
+        $buffer = self::interpolate($message, $context);
         $this->write($buffer, self::CRITICAL);
     }
 
@@ -198,7 +198,7 @@ class Logger extends \SplFileObject
      */
     public function error($message, array $context = array())
     {
-        $buffer = $this->interpolate($message, $context);
+        $buffer = self::interpolate($message, $context);
         $this->write($buffer, self::ERROR);
     }
 
@@ -210,7 +210,7 @@ class Logger extends \SplFileObject
      */
     public function warning($message, array $context = array())
     {
-        $buffer = $this->interpolate($message, $context);
+        $buffer = self::interpolate($message, $context);
         $this->write($buffer, self::WARNING);
     }
 
@@ -221,7 +221,7 @@ class Logger extends \SplFileObject
      */
     public function notice($message, array $context = array())
     {
-        $buffer = $this->interpolate($message, $context);
+        $buffer = self::interpolate($message, $context);
         $this->write($buffer, self::NOTICE);
     }
 
@@ -233,7 +233,7 @@ class Logger extends \SplFileObject
      */
     public function info($message, array $context = array())
     {
-        $buffer = $this->interpolate($message, $context);
+        $buffer = self::interpolate($message, $context);
         $this->write($buffer, self::INFO);
     }
 
@@ -244,7 +244,7 @@ class Logger extends \SplFileObject
      */
     public function debug($message, array $context = array())
     {
-        $buffer = $this->interpolate($message, $context);
+        $buffer = self::interpolate($message, $context);
         $this->write($buffer, self::DEBUG);
     }
 
@@ -294,7 +294,7 @@ class Logger extends \SplFileObject
      * @param array $context
      * @return string
      */
-    private function interpolate($message, array $context = array())
+    static private function interpolate($message, array $context = array())
     {
         // 构建一个花括号包含的键名的替换数组
         $replace = array();
@@ -306,7 +306,7 @@ class Logger extends \SplFileObject
         return strtr($message, $replace);
     }
 
-    private function colorString($string, $color = null)
+    static private function colorString($string, $color = null)
     {
         if ($color !== null && self::$log_color) {
             return self::COLOR_SEQ . $color . $string . self::RESET_SEQ;

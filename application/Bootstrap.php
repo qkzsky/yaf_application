@@ -83,6 +83,15 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
         $dispatcher->setView($layout);
     }
 
+    public function _initLoader(Yaf_Dispatcher $dispatcher)
+    {
+        spl_autoload_register(["Loader", "loaderService"], true, true);
+        $vendor_autoload = APP_PATH . '/vendor/autoload.php';
+        if (file_exists($vendor_autoload)) {
+            require $vendor_autoload;
+        }
+    }
+
     public function _initPlugin(Yaf_Dispatcher $dispatcher)
     {
         // $dispatcher->registerPlugin(new LogPlugin());
@@ -99,15 +108,6 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
         //        {
         //            $dispatcher->registerPlugin(new AuthTokenPlugin());
         //        }
-    }
-
-    public function _initLoader(Yaf_Dispatcher $dispatcher)
-    {
-        spl_autoload_register(["Loader", "loaderService"], true, true);
-        $vendor_autoload = APP_PATH . '/vendor/autoload.php';
-        if (file_exists($vendor_autoload)) {
-            require $vendor_autoload;
-        }
     }
 
     /**
