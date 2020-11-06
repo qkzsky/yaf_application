@@ -53,12 +53,12 @@ class ApplicationController extends Yaf_Controller_Abstract
 
             // Assign session to views too.
             $this->getView()->session = $this->session;
-        }
 
-        // Set the layout.
-        $this->getView()->setLayout($this->layout);
-        if ($this->getModuleName() !== "Index") {
-            $this->getView()->setScriptPath(Yaf_Application::app()->getConfig()->application->directory . "/modules/{$this->getModuleName()}/views");
+            // Set the layout.
+            $this->getView()->setLayout($this->layout);
+            if ($this->getModuleName() !== "Index") {
+                $this->getView()->setScriptPath(Yaf_Application::app()->getConfig()->application->directory . "/modules/{$this->getModuleName()}/views");
+            }
         }
     }
 
