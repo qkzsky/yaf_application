@@ -49,9 +49,6 @@ class Redis
             $redis->setOption(\Redis::OPT_PREFIX, $_config->prefix);
         }
         switch ($_config->serializer) {
-            case 'none':
-                $redis->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_NONE);
-                break;
             case 'php':
                 $redis->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_PHP);
                 break;
