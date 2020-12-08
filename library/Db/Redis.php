@@ -64,7 +64,7 @@ class Redis
         if (isset($_config->db) && $_config->db !== '') {
             $redis->select($_config->db);
         }
-        if (isset($_config->auth)) {
+        if (isset($_config->auth) && $_config->auth !== '') {
             $redis->auth($_config->auth);
         }
         return $redis;
