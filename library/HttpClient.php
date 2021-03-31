@@ -512,6 +512,9 @@ class HttpClient
 
         $this->_response_header = substr($response, 0, $headerSize);
         $this->_response_body   = substr($response, $headerSize);
+        if (strpos($this->_response_header, "Content-Encoding: gzip") !== false) {
+            $this->_response_body = gzdecode($this->_response_body);
+        }
         return true;
     }
 
