@@ -311,7 +311,7 @@ class Mysql
                     $_keys[]                 = $_field_key;
                     $parameters[$_field_key] = $_v;
                 };
-                $sql = preg_replace("/({$_k}([^\w]|$))/", implode(",", $_keys) . "$2", $sql);
+                $sql = preg_replace("/({$_k}([^\w]|$))/", "(" . implode(",", $_keys) . "$2)", $sql);
                 unset($parameters[$k]);
             }
         }
