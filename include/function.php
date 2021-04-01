@@ -779,7 +779,7 @@ function show_progress(int $done, int $total, $size = 30)
     $eta  = round($rate * $left, 2);
 
     $total_len = strlen($total);
-    $show_bar = sprintf("\r%s %5.2f%%  %{$total_len}d/%d remaining: %3d sec.  elapsed: %3d sec. ", $status_bar, number_format($percent * 100, 2), $done, $total, number_format($eta), number_format($elapsed));
+    $show_bar = sprintf("\r%s %5.2f%%  %{$total_len}d/%d remaining: %3s sec.  elapsed: %3s sec. ", $status_bar, number_format($percent * 100, 2), $done, $total, number_format($eta), number_format($elapsed));
     echo $show_bar;
 
     flush();
