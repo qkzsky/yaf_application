@@ -797,7 +797,7 @@ class Mysql
             $condition = " WHERE " . $condition;
         }
 
-        $sql = "DELETE FROM {$table} {$condition}";
+        $sql = "DELETE FROM `{$table}` {$condition}";
         $this->execute($sql, $cond_parameters);
     }
 
