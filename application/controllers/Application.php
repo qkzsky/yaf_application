@@ -77,11 +77,12 @@ class ApplicationController extends Yaf_Controller_Abstract
         $this->getView()->assignRef($name, $this->$name);
     }
 
-    public function display($tpl, array $parameters = NULL)
+    public function display(string $tpl, array $parameters = NULL): bool
     {
         $body = parent::render($tpl, $parameters);
         $this->getResponse()->setBody($body);
         // parent::display($tpl, $parameters);
+        return true;
     }
 
     /**
