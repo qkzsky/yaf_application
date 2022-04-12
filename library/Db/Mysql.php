@@ -60,6 +60,7 @@ class Mysql
 
     /**
      * 数据库配置
+     * @var object
      */
     private $_db_config = null;
 
@@ -771,7 +772,7 @@ class Mysql
         }
 
         foreach ($field_case as $field => $v) {
-            $case     = "`{$field}`=CASE " . implode($v, ' ') . " ELSE `{$field}` END";
+            $case     = "`{$field}`=CASE " . implode(' ', $v) . " ELSE `{$field}` END";
             $s_list[] = $case;
         }
 
