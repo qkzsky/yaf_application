@@ -34,8 +34,7 @@ class IndexController extends ApplicationController
     // php index.php "index%index/shell?k1=v1&k2=v2"
     public function shellAction()
     {
-        if (!$this->getRequest()->isCli())
-        {
+        if (!$this->getRequest()->isCli()) {
             $this->redirectNotFound();
             return false;
         }
@@ -43,5 +42,4 @@ class IndexController extends ApplicationController
         $params = $this->getRequest()->getParams();
         printf("Time: %s\nParams: %s\n", __DATETIME__, http_build_query($params));
     }
-
 }

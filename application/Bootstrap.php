@@ -32,7 +32,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
         }
 
         $dispatcher->setErrorHandler([__CLASS__, 'error_handler']);
-        register_shutdown_function(function() {
+        register_shutdown_function(function () {
             $error = error_get_last();
             if ($error) {
                 \Logger::getLogger("fatal_error")->error(json_encode($error));
@@ -153,9 +153,9 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
         if ($request->isCli()) {
             global $argc, $argv;
             if ($argc > 1) {
-                $uri = $argv [1];
-                if (preg_match('/^[^?]*%/i', $uri)) {
-                    list ($module, $uri) = explode('%', $uri, 2);
+                $uri = $argv[1];
+                if (preg_match('/^[^?]*([%|@])/i', $uri, $matches)) {
+                    list($module, $uri) = explode($matches[1], $uri, 2);
                     if (isset($module)) {
                         $module = strtolower($module);
                         if (in_array(ucfirst($module), Yaf_Application::app()->getModules())) {
@@ -166,7 +166,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
 
                 $args = [];
                 if (false !== strpos($uri, '?')) {
-                    list ($uri, $args_str) = explode('?', $uri, 2);
+                    list($uri, $args_str) = explode('?', $uri, 2);
                     parse_str($args_str, $args);
                 }
                 $request->setRequestUri($uri);
@@ -247,5 +247,4 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
             // \StatsD::count(sprintf("log.exception.%s", $_uri), 1);
         }
     }
-
 }
